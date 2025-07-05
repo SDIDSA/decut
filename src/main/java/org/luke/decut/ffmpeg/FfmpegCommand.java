@@ -68,7 +68,16 @@ public class FfmpegCommand implements CommandPart {
     }
 
     public static String getFfmpegBinary() {
-        File ffmpegRoot = new File(LocalStore.getDefaultFfmpeg());
+        String defStr = LocalStore.getDefaultFfmpeg();
+        if(defStr == null) {
+            if(systemFfmpeg()) {
+                return "ffmpeg";
+            } else {
+                return null;
+            }
+        }
+
+        File ffmpegRoot = new File(defStr);
         if(!ffmpegRoot.exists() || !ffmpegRoot.isDirectory()) {
             if(systemFfmpeg()) {
                 return "ffmpeg";
@@ -76,6 +85,7 @@ public class FfmpegCommand implements CommandPart {
                 return null;
             }
         }
+
         LocalInstall ffmpeg = FfmpegManager.versionFromDir(ffmpegRoot);
         if(ffmpeg == null) {
             return null;
