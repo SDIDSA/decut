@@ -56,7 +56,7 @@ public class FfmpegCommand implements CommandPart {
     private FfmpegCommand execute(String ffmpegBinary) {
         String com = apply(this, ffmpegBinary);
         System.out.println(com);
-        running = new Command(this::handleLine, this::handleLine, com).addOnExit(code -> {
+        running = new Command(this::handleLine, this::handleLine, com).addOnExit(_ -> {
             if (output != null && output.exists() && output.length() > 0) {
                 if (onOutput != null) {
                     onOutput.accept(output);
@@ -80,7 +80,7 @@ public class FfmpegCommand implements CommandPart {
         if(ffmpeg == null) {
             return null;
         }
-        return ffmpeg.getBinary().getAbsolutePath();
+        return "\"" + ffmpeg.getBinary().getAbsolutePath() + "\"";
     }
 
     public FfmpegCommand execute() {

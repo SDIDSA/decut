@@ -15,6 +15,7 @@ import org.luke.decut.local.ui.Installed;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class FfmpegManager {
 
@@ -35,9 +36,7 @@ public class FfmpegManager {
 
 		installable = new HashMap<>();
 		JSONObject obj = new JSONObject(FileDealer.read("/ffbinaries.json")).getJSONObject(Os.fromSystem().getName());
-		obj.keySet().forEach(key -> {
-			installable.put(key, obj.getString(key));
-		});
+		obj.keySet().forEach(key -> installable.put(key, obj.getString(key)));
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs();
 	}
@@ -48,9 +47,7 @@ public class FfmpegManager {
 		if (found == null) {
 			found = new Installed(win, version, dirForVer(version), onChange);
 			final Installed ffound = found;
-			found.setOnRemove(() -> {
-				DirUtils.deleteDir(ffound.getTargetDir());
-			});
+			found.setOnRemove(() -> DirUtils.deleteDir(ffound.getTargetDir()));
 			managedCache.put(version, found);
 		}
 
@@ -62,9 +59,7 @@ public class FfmpegManager {
 
 		if (found == null) {
 			found = new Installed(win, ver.getVersion(), ver.getRoot(), onChange);
-			found.setOnRemove(() -> {
-				LocalStore.removeFfmpegInst(ver.getRoot().getAbsolutePath());
-			});
+			found.setOnRemove(() -> LocalStore.removeFfmpegInst(ver.getRoot().getAbsolutePath()));
 			localCache.put(ver.getRoot(), found);
 		}
 
@@ -115,11 +110,11 @@ public class FfmpegManager {
 	}
 
 	public static File dirForVer(String version) {
-		return new File(root.getAbsolutePath() + "\\" + version);
+		return new File(root, version);
 	}
 
 	public static List<File> managedInstalls() {
-		ArrayList<File> res = new ArrayList<File>();
+		ArrayList<File> res = new ArrayList<>();
 
 		for (File sub : root.listFiles()) {
 			res.add(sub);
@@ -170,6 +165,7 @@ public class FfmpegManager {
 	}
 
 	public static LocalInstall versionFromDir(File file) {
+		System.out.println(file);
 		if (file.listFiles() == null) {
 			return null;
 		}
@@ -180,7 +176,7 @@ public class FfmpegManager {
 					return version;
 				}
 			} else if (isFFmpegBinary(sf)) {
-				String version = getFFmpegVersion(sf.getAbsolutePath());
+				String version = getFFmpegVersion("\""+sf.getAbsolutePath()+"\"");
 				if (version != null) {
 					return new LocalInstall(sf.getParentFile(), sf, version);
 				}
@@ -202,19 +198,21 @@ public class FfmpegManager {
 
 	public static String getFFmpegVersion(String ffmpegBinary) {
 		AtomicReference<String> versionRef = new AtomicReference<>();
-
+		Consumer<String> parser = line -> {
+			if (line.startsWith("ffmpeg version")) {
+				String version = extractVersionFromLine(line);
+				if (version != null) {
+					versionRef.set(version);
+				}
+			}
+		};
         try {
-            int code = new Command(ffmpegBinary, "-version")
-                    .addInputHandler(line -> {
-                        if (line.startsWith("ffmpeg version")) {
-                            String version = extractVersionFromLine(line);
-                            if (version != null) {
-                                versionRef.set(version);
-                            }
-                        }
-                    }).execute(new File("/"))
+            new Command(ffmpegBinary, "-version")
+                    .addErrorHandler(parser)
+                    .addInputHandler(parser)
+                    .execute(new File("/"))
                     .waitFor();
-			if(code == 0) {
+            if(versionRef.get() != null) {
 				return versionRef.get();
 			}
         } catch (InterruptedException e) {
@@ -225,6 +223,7 @@ public class FfmpegManager {
 
 	private static String extractVersionFromLine(String line) {
 		try {
+			System.out.println(line);
 			String[] parts = line.split(" ");
 			if (parts.length >= 3) {
 				String versionPart = parts[2];
