@@ -16,6 +16,8 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FfmpegManager {
 
@@ -238,8 +240,9 @@ public class FfmpegManager {
 				if (versionPart.contains("-")) {
 					versionPart = versionPart.split("-")[0];
 				}
-				if (versionPart.matches("\\d+(\\.\\d+)*")) {
-					return versionPart;
+				Matcher m = Pattern.compile("(\\d+\\.\\d+(\\.\\d+)?)").matcher(versionPart);
+				if (m.find()) {
+					return m.group(1);
 				}
 			}
 		} catch (Exception e) {
