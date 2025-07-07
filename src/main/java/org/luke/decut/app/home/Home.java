@@ -223,10 +223,6 @@ public class Home extends Page {
         return snapToFrame(pixels / ppsProperty().get());
     }
 
-    public double pixelToTimeNoSnap(double pixels) {
-        return pixels / ppsProperty().get();
-    }
-
     public double snapToFrame(double seconds) {
         return Math.floor(seconds * frameRate.get()) / frameRate.get();
     }

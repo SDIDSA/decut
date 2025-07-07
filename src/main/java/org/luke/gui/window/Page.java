@@ -8,9 +8,7 @@ import org.json.JSONObject;
 import org.luke.gui.UiCache;
 import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.style.Styleable;
-import org.luke.gui.window.content.AppPreRoot;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.layout.StackPane;
@@ -27,8 +25,6 @@ public abstract class Page extends StackPane implements Styleable {
 	
 	protected Window window;
 	protected Dimension minSize;
-	
-	private final ChangeListener<? super Boolean> onPaddingChange;
 
 	public Page(Window window, Dimension minSize) {
 		this.window = window;
@@ -56,24 +52,14 @@ public abstract class Page extends StackPane implements Styleable {
 			setClip(Shape.union(clipBottom, clipTop));
 		});
 
-		onPaddingChange = (obs, ov, nv) -> {
-			if (nv) {
-				clipBottom.setArcHeight(arc);
-				clipBottom.setArcWidth(arc);
-			} else {
-				clipBottom.setArcHeight(0);
-				clipBottom.setArcWidth(0);
-			}
 
-			setClip(Shape.union(clipBottom, clipTop));
-		};
+		clipBottom.setArcHeight(arc);
+		clipBottom.setArcWidth(arc);
 
 		DoubleExpression height = window.heightProperty()
-				.subtract(Bindings.when(window.getRoot().paddedProperty()).then(AppPreRoot.DEFAULT_PADDING * 2).otherwise(0))
 				.subtract(window.getAppBar().heightProperty()).subtract(window.getBorderWidth().multiply(2));
 
 		DoubleExpression width = window.widthProperty()
-				.subtract(Bindings.when(window.getRoot().paddedProperty()).then(AppPreRoot.DEFAULT_PADDING * 2).otherwise(0))
 				.subtract(window.getBorderWidth().multiply(2));
 
 		setMinHeight(0);
@@ -96,12 +82,11 @@ public abstract class Page extends StackPane implements Styleable {
 
 	public void setup() {
 		window.setMinSize(minSize);
-		
-		window.paddedProperty().addListener(onPaddingChange);
+
 	}
 
 	public void destroy() {
-		window.paddedProperty().removeListener(onPaddingChange);
+
 	}
 
 	public static boolean hasInstance(Class<? extends Page> type) {

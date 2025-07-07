@@ -17,8 +17,6 @@ import org.luke.gui.window.content.AppPreRoot;
 import org.luke.gui.window.content.TransparentScene;
 import org.luke.gui.window.content.app_bar.AppBar;
 import org.luke.gui.window.content.app_bar.AppBarButton;
-import org.luke.gui.window.helpers.State;
-import org.luke.gui.window.helpers.TileHint;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -60,7 +58,7 @@ public class Window extends Stage {
 
         borderWidth = new SimpleDoubleProperty(0);
 
-        initStyle(StageStyle.TRANSPARENT);
+        initStyle(StageStyle.EXTENDED);
 
         root = new AppPreRoot(this);
 
@@ -172,11 +170,6 @@ public class Window extends Stage {
         return borderWidth;
     }
 
-    // Get the padded property of the root content
-    public BooleanProperty paddedProperty() {
-        return root.paddedProperty();
-    }
-
     // Get the style property of the window
     public ObjectProperty<Style> getStyl() {
         return style;
@@ -209,28 +202,10 @@ public class Window extends Stage {
         return root.getMenuBar();
     }
 
-    // Maximize or restore the window
-    public void maxRestore() {
-        if (root.isTiled()) {
-            restore();
-        } else {
-            maximize();
-        }
-    }
-
     // Set the minimum size of the window
     public void setMinSize(Dimension d) {
-        root.setMinSize(d);
-    }
-
-    // Maximize the window
-    private void maximize() {
-        root.applyTile(TileHint.tileForState(State.N));
-    }
-
-    // Restore the window
-    private void restore() {
-        root.unTile();
+        setMinWidth(d.getWidth());
+        setMinHeight(d.getHeight());
     }
 
     // Close the window
