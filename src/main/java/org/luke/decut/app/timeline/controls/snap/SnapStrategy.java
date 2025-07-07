@@ -2,36 +2,32 @@ package org.luke.decut.app.timeline.controls.snap;
 
 import org.luke.decut.app.home.Home;
 
-import java.util.List;
+import java.util.function.BiFunction;
 
 public enum SnapStrategy {
-    SECOND(SnapPointsFactory.SECOND, "Second", "snap-to-second"),
-    FIFTH(SnapPointsFactory.FIFTH, "Fifth", "snap-to-fifth"),
-    CLIPS(SnapPointsFactory.CLIPS, "Clip", "snap-to-clips"),
-    FRAME(SnapPointsFactory.FRAME, "Frame", "snap-to-frame");
+    SECOND((owner, time) -> {
+        double threshold = owner.pixelToTime(10);
+        double mod = ((time + 0.5) % 1) - 0.5;
+        if(Math.abs(mod) < threshold) {
+            return (double) Math.round(time);
+        }
+        return time;
+    }, "Second", "snap-to-second"),
+    FIFTH(null, "Fifth", "snap-to-fifth"),
+    CLIPS(null, "Clip", "snap-to-clips"),
+    FRAME(null, "Frame", "snap-to-frame");
 
-    private final SnapPointsFactory snapPointsFactory;
+    private final BiFunction<Home, Double, Double> snapper;
     private final String name;
     private final String icon;
 
-    SnapStrategy(SnapPointsFactory snapPointsFactory, String name, String icon) {
-        this.snapPointsFactory = snapPointsFactory;
+    SnapStrategy(BiFunction<Home, Double, Double> snapper, String name, String icon) {
+        this.snapper = snapper;
         this.name = name;
         this.icon = icon;
     }
-
-    private List<Double> snapPoints;
     public double snap(Home owner, double time) {
-        if(snapPoints == null) {
-            snapPoints = snapPointsFactory.apply(owner);
-        }
-        double threshold = owner.pixelToTime(10);
-        for (double point : snapPoints) {
-            if (Math.abs(time - point) <= threshold) {
-                return point;
-            }
-        }
-        return time;
+        return snapper.apply(owner, time);
     }
 
     public String getName() {
@@ -42,7 +38,7 @@ public enum SnapStrategy {
         return icon;
     }
 
-    public SnapStrategy forName(String name) {
+    public static SnapStrategy forName(String name) {
         for (SnapStrategy value : values()) {
             if(value.name.equals(name)) {
                 return value;

@@ -3,6 +3,7 @@ package org.luke.decut.app.timeline.clips;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.luke.decut.app.home.Home;
@@ -33,7 +34,7 @@ public class AudioClip extends TimelineClip {
 
         getChildren().add(thumb);
 
-        waveformUpdateTimeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
+        waveformUpdateTimeline = new Timeline(new KeyFrame(Duration.millis(100), _ -> {
             long command = System.currentTimeMillis();
             lastCommand = command;
             Platform.runBack(() -> {
@@ -78,8 +79,7 @@ public class AudioClip extends TimelineClip {
         }));
         waveformUpdateTimeline.setCycleCount(1);
 
-        InvalidationListener listener = obs -> {
-            // Update display based on current visible times
+        ChangeListener<? super Number> listener = (_,_,_) -> {
             if (visibleStartTime != 0 || visibleEndTime != 0) {
                 double pps = owner.ppsProperty().get();
                 double audioDuration = visibleEndTime - visibleStartTime;
@@ -102,7 +102,7 @@ public class AudioClip extends TimelineClip {
         track.heightProperty().addListener(listener);
 
         Platform.runAfter(() -> {
-            listener.invalidated(owner.ppsProperty());
+            listener.changed(owner.ppsProperty(), 0, 1);
         }, 100);
 
         applyStyle(owner.getWindow().getStyl().get());

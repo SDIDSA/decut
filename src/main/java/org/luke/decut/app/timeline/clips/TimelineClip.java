@@ -3,14 +3,10 @@ package org.luke.decut.app.timeline.clips;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Cursor;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import org.luke.decut.app.home.Home;
 import org.luke.decut.app.lib.assets.data.AssetData;
 import org.luke.decut.app.timeline.tracks.Track;
-import org.luke.decut.dragdrop.ClipDrag;
 import org.luke.gui.factory.Backgrounds;
 import org.luke.gui.factory.Borders;
 import org.luke.gui.style.Style;
@@ -24,7 +20,7 @@ public class TimelineClip extends Pane implements Styleable {
     private final Track track;
     private final Home owner;
 
-    private DoubleProperty startTime;
+    private final DoubleProperty startTime;
     private double duration;
 
     protected final DoubleProperty inPoint;
@@ -42,11 +38,11 @@ public class TimelineClip extends Pane implements Styleable {
     private double initIn;
     private HashMap<TimelineClip, Double> initStartTimes;
 
-    public TimelineClip(Home owner, Track track, AssetData sourceAsset, double startTime) {
+    public TimelineClip(Home owner, Track track, AssetData sourceAsset, double prestart) {
         this.owner = owner;
         this.track = track;
         this.sourceAsset = sourceAsset;
-        this.startTime = new SimpleDoubleProperty(owner.snapToFrame(startTime));
+        this.startTime = new SimpleDoubleProperty(owner.snapToFrame(prestart));
         this.duration = owner.snapToFrame(sourceAsset.getDurationSeconds());
         this.inPoint = new SimpleDoubleProperty(0);
         this.outPoint = new SimpleDoubleProperty(duration);
@@ -74,13 +70,11 @@ public class TimelineClip extends Pane implements Styleable {
         });
 
         setOnMousePressed(event -> {
-            if (resizeOut || resizeIn) {
-                initX = event.getSceneX();
-                initOut = outPoint.get();
-                initIn = inPoint.get();
-                initStart = this.startTime.get();
-                initStartTimes = saveStartTimes();
-            }
+            initX = event.getSceneX();
+            initOut = outPoint.get();
+            initIn = inPoint.get();
+            initStart = this.startTime.get();
+            initStartTimes = saveStartTimes();
         });
 
         setOnMouseDragged(event -> {
@@ -95,19 +89,29 @@ public class TimelineClip extends Pane implements Styleable {
                         inPoint.get());
                 if(newOut==outPoint.get()) return;
                 setOutPoint(newOut);
-                resolveResizeCollision();
+                resolveCollision();
             } else if (resizeIn) {
-                double newIn = Math.max(Math.min(owner.snapDrag(initIn + dt), outPoint.get()), 0);
+                double newIn = Math.max(
+                        Math.min(
+                                owner.snapDrag(initIn + dt),
+                                outPoint.get()),
+                        0);
                 double inPointDelta = newIn - initIn;
                 double newStartTime = initStart + inPointDelta;
                 if(newIn == inPoint.get()) return;
                 setInPointAndStartTime(newIn, newStartTime);
-                resolveResizeCollision();
+                resolveCollision();
+            } else {
+                double newStartTime = Math.max(0, owner.snapDrag(initStart + dt));
+                if (newStartTime != this.startTime.get()) {
+                    setStartTime(newStartTime);
+                    resolveCollision();
+                }
             }
         });
 
         setOnMouseReleased(_ -> {
-            if (resizeOut) {
+            if (outPoint.get() != initOut) {
                 double newOut = outPoint.get();
                 HashMap<TimelineClip, Double> newStarts = saveStartTimes();
                 double oldOut = initOut;
@@ -121,9 +125,7 @@ public class TimelineClip extends Pane implements Styleable {
                             setOutPoint(oldOut);
                             applyStartTimes(oldStarts);
                         });
-            }
-
-            if (resizeIn) {
+            }else if (inPoint.get() != initIn) {
                 double newIn = inPoint.get();
                 HashMap<TimelineClip, Double> newStarts = saveStartTimes();
                 double oldIn = initIn;
@@ -137,26 +139,13 @@ public class TimelineClip extends Pane implements Styleable {
                             setInPoint(oldIn);
                             applyStartTimes(oldStarts);
                         });
+            } else if(startTime.get() != initStart) {
+                HashMap<TimelineClip, Double> newStarts = saveStartTimes();
+                HashMap<TimelineClip, Double> oldStarts = new HashMap<>(initStartTimes);
+                owner.perform("Move clip",
+                        () -> applyStartTimes(newStarts),
+                        () -> applyStartTimes(oldStarts));
             }
-        });
-
-        setOnDragDetected(event -> {
-            if (resizeIn || resizeOut) return;
-
-            Dragboard db = startDragAndDrop(TransferMode.MOVE);
-
-            WritableImage snapshot = snapshot(null, null);
-            db.setDragView(snapshot);
-
-            ClipDrag dc = new ClipDrag(owner, this);
-            dc.putContent(db);
-
-            setGroupOpacity(0.5);
-            event.consume();
-        });
-
-        setOnDragDone(e -> {
-            setGroupOpacity(1);
         });
 
         updateUIPosition();
@@ -178,7 +167,7 @@ public class TimelineClip extends Pane implements Styleable {
         times.forEach(TimelineClip::setStartTime);
     }
 
-    private void resolveResizeCollision() {
+    private void resolveCollision() {
         List<TimelineClip> clips = track.getContent().getSortedClips();
         int currentIndex = clips.indexOf(this);
 
@@ -281,8 +270,8 @@ public class TimelineClip extends Pane implements Styleable {
     }
 
     void setInPointAndStartTimeInternal(double newInPoint, double newStartTime) {
-        this.inPoint.set(newInPoint);
-        this.startTime.set(newStartTime);
+        this.inPoint.set(owner.snapToFrame(newInPoint));
+        this.startTime.set(owner.snapToFrame(newStartTime));
         this.duration = outPoint.get() - newInPoint;
         updateUIPosition();
     }
@@ -321,7 +310,7 @@ public class TimelineClip extends Pane implements Styleable {
     }
 
     private void setDuration(double duration) {
-        this.duration = duration;
+        this.duration = owner.snapToFrame(duration);
         updateUIPosition();
     }
 
@@ -372,24 +361,24 @@ public class TimelineClip extends Pane implements Styleable {
 
     // Internal setter that doesn't trigger linked updates
     void setStartTimeInternal(double startTime) {
-        this.startTime.set(startTime);
+        this.startTime.set(owner.snapToFrame(startTime));
         updateUIPosition();
     }
 
     public void setTimeshiftInternal(double timeshift) {
-        this.timeshift = timeshift;
+        this.timeshift = owner.snapToFrame(timeshift);
         updateUIPosition();
     }
 
     // Internal setter that doesn't trigger linked updates
     void setInPointInternal(double inPoint) {
-        this.inPoint.set(inPoint);
+        this.inPoint.set(owner.snapToFrame(inPoint));
         setDuration(outPoint.get() - inPoint);
     }
 
     // Internal setter that doesn't trigger linked updates
     void setOutPointInternal(double outPoint) {
-        this.outPoint.set(outPoint);
+        this.outPoint.set(owner.snapToFrame(outPoint));
         setDuration(outPoint - inPoint.get());
     }
 
