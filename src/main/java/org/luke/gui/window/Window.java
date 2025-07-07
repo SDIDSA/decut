@@ -34,9 +34,6 @@ public class Window extends Stage {
     // Listeners to be executed on window close
     private final ArrayList<Runnable> onClose = new ArrayList<>();
 
-    // Width of the window border
-    private final DoubleProperty borderWidth;
-
     // Object properties for style and locale
     private final ObjectProperty<Style> style;
     private final ObjectProperty<Locale> locale;
@@ -55,8 +52,6 @@ public class Window extends Stage {
         this.app = app;
         this.style = new SimpleObjectProperty<>(style);
         this.locale = new SimpleObjectProperty<>(locale);
-
-        borderWidth = new SimpleDoubleProperty(0);
 
         initStyle(StageStyle.EXTENDED);
 
@@ -157,17 +152,6 @@ public class Window extends Stage {
     // Set the fill color of the window
     public void setFill(Paint fill) {
         root.setFill(fill);
-    }
-
-    // Set the border color and width of the window
-    public void setBorder(Paint fill, double width) {
-        root.setBorder(fill, width);
-        borderWidth.set(width);
-    }
-
-    // Get the window border width property
-    public DoubleProperty getBorderWidth() {
-        return borderWidth;
     }
 
     // Get the style property of the window

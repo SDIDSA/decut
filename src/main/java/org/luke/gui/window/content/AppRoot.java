@@ -20,16 +20,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 public class AppRoot extends BorderPane implements Styleable {
-	public static final Color DEFAULT_WINDOW_BORDER = Color.gray(.5);
 
 	private final AppBar bar;
 
 	public AppRoot(Window window) {
-		setBorderFill(DEFAULT_WINDOW_BORDER, 1);
-		window.maximizedProperty().addListener((_,_,nv) -> {
-			setBorderFill(DEFAULT_WINDOW_BORDER, nv ? 0 : 1);
-		});
-
 		bar = new AppBar(window);
 		HeaderBar barCont = new HeaderBar();
 		HeaderBar.setDragType(bar, HeaderDragType.DRAGGABLE);
@@ -64,7 +58,7 @@ public class AppRoot extends BorderPane implements Styleable {
 	}
 
 	public void setBorderFill(Paint fill, double width) {
-		setBorder(Borders.make(fill, 0, width));
+		//setBorder(Borders.make(fill, 0, width));
 	}
 
 	private Page old = null;

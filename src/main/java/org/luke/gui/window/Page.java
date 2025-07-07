@@ -10,7 +10,6 @@ import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.style.Styleable;
 
 import javafx.beans.binding.DoubleExpression;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -37,14 +36,14 @@ public abstract class Page extends StackPane implements Styleable {
 
 		Rectangle clipTop = new Rectangle();
 		
-		widthProperty().addListener((obs, ov, nv) -> {
+		widthProperty().addListener((_, _, nv) -> {
 			clipBottom.setWidth(nv.doubleValue());
 			clipTop.setWidth(nv.doubleValue());
 
 			setClip(Shape.union(clipBottom, clipTop));
 		});
 
-		heightProperty().addListener((obs, ov, nv) -> {
+		heightProperty().addListener((_, _, nv) -> {
 			clipTop.setHeight(nv.doubleValue() / 2 + arc);
 			clipBottom.setHeight(nv.doubleValue() / 2);
 			clipBottom.setY(nv.doubleValue() / 2);
@@ -57,10 +56,9 @@ public abstract class Page extends StackPane implements Styleable {
 		clipBottom.setArcWidth(arc);
 
 		DoubleExpression height = window.heightProperty()
-				.subtract(window.getAppBar().heightProperty()).subtract(window.getBorderWidth().multiply(2));
+				.subtract(window.getAppBar().heightProperty());
 
-		DoubleExpression width = window.widthProperty()
-				.subtract(window.getBorderWidth().multiply(2));
+		DoubleExpression width = window.widthProperty();
 
 		setMinHeight(0);
 		maxHeightProperty().bind(height);
