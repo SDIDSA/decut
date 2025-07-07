@@ -167,7 +167,6 @@ public class FfmpegManager {
 	}
 
 	public static LocalInstall versionFromDir(File file) {
-		System.out.println(file);
 		if (file.listFiles() == null) {
 			return null;
 		}
@@ -233,7 +232,6 @@ public class FfmpegManager {
 
 	private static String extractVersionFromLine(String line) {
 		try {
-			System.out.println(line);
 			String[] parts = line.split(" ");
 			if (parts.length >= 3) {
 				String versionPart = parts[2];

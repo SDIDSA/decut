@@ -27,63 +27,65 @@ public class LinkedClips {
         return clips;
     }
 
-    public void updateStartTime(TimelineClip source, double newStartTime) {
+    public void updateStartTime(double newStartTime) {
         if (updating) return;
         updating = true;
 
         try {
-            double offset = newStartTime - source.getStartTime();
-
             for (TimelineClip clip : clips) {
-                if (clip != source) {
-                    clip.setStartTimeInternal(clip.getStartTime() + offset);
-                }
+                clip.setStartTimeInternal(newStartTime);
             }
         } finally {
             updating = false;
         }
     }
 
-    public void updateInPointAndStartTime(TimelineClip sourceClip, double newInPoint, double newStartTime) {
+    public void updateInPointAndStartTime(double newInPoint, double newStartTime) {
         if (updating) return;
         updating = true;
 
         try {
             for (TimelineClip clip : clips) {
-                if (clip != sourceClip) {
-                    clip.setInPointAndStartTimeInternal(newInPoint, newStartTime);
-                }
+                clip.setInPointAndStartTimeInternal(newInPoint, newStartTime);
             }
         } finally {
             updating = false;
         }
     }
 
-    public void updateTimeshift(TimelineClip source, double newTimeshift) {
+    public void updateTimeshift(double newTimeshift) {
         if (updating) return;
         updating = true;
 
         try {
             for (TimelineClip clip : clips) {
-                if (clip != source) {
-                    clip.setTimeshiftInternal(newTimeshift);
-                }
+                clip.setTimeshiftInternal(newTimeshift);
             }
         } finally {
             updating = false;
         }
     }
 
-    public void updateInOutPoints(TimelineClip source, double deltaIn, double deltaOut) {
+    public void setInPoint(double intPoint) {
         if (updating) return;
         updating = true;
 
         try {
             for (TimelineClip clip : clips) {
-                if (clip != source) {
-                    clip.setInPointInternal(clip.getInPoint() - deltaIn);
-                    clip.setOutPointInternal(clip.getOutPoint() - deltaOut);
-                }
+                clip.setInPointInternal(intPoint);
+            }
+        } finally {
+            updating = false;
+        }
+    }
+
+    public void setOutPoint(double outPoint) {
+        if (updating) return;
+        updating = true;
+
+        try {
+            for (TimelineClip clip : clips) {
+                clip.setOutPointInternal(outPoint);
             }
         } finally {
             updating = false;
