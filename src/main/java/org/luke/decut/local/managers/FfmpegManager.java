@@ -235,6 +235,14 @@ public class FfmpegManager {
 			String[] parts = line.split(" ");
 			if (parts.length >= 3) {
 				String versionPart = parts[2];
+
+				if (versionPart.matches("\\d{4}-\\d{2}-\\d{2}-git-.*")) {
+					String[] dateParts = versionPart.split("-");
+					if (dateParts.length >= 3) {
+						return dateParts[0] + "." + dateParts[1] + "." + dateParts[2];
+					}
+				}
+
 				if (versionPart.contains("-")) {
 					versionPart = versionPart.split("-")[0];
 				}

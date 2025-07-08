@@ -59,7 +59,7 @@ public class TimelineRenderer {
         command.setOutput(outputFile);
 
         // Set codecs
-        command.setCodec(new VideoCodec("libx264"));
+        command.setCodec(VideoCodec.H264);
         command.setCodec(new AudioCodec("aac"));
 
         // Collect all clips from all tracks

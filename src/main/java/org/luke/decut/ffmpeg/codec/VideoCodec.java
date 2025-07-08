@@ -2,9 +2,29 @@ package org.luke.decut.ffmpeg.codec;
 
 import org.luke.decut.ffmpeg.core.StreamType;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class VideoCodec extends Codec {
-    public VideoCodec(String codecName) {
+    private static final ArrayList<VideoCodec> all = new ArrayList<>();
+
+    private VideoCodec(String codecName) {
         super(StreamType.VIDEO, codecName);
+        all.add(this);
+    }
+
+    @Override
+    public String toString() {
+        return getCodecName();
+    }
+
+    public static List<VideoCodec> getAllSupported() {
+        return Collections.unmodifiableList(all);
+    }
+
+    public static List<VideoCodec> getNeededCodecs() {
+        return List.of(H264, H265, H264_NVENC, HEVC_NVENC);
     }
 
     // Special codec

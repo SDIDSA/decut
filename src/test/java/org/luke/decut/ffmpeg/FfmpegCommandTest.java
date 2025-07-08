@@ -4,8 +4,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.luke.decut.ffmpeg.codec.Codec;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
+import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.preset.Preset;
 
 import java.io.File;
@@ -13,24 +19,20 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FfmpegCommandTest {
-    private static File h264;
-    private static File h265;
+    private static File src;
 
     private File out;
 
     @BeforeAll
     static void inputs() throws URISyntaxException {
-        URL h264Res = FfmpegCommandTest.class.getResource("/h264.mp4");
-        assertNotNull(h264Res);
-        h264 = Paths.get(h264Res.toURI()).toFile();
-
-        URL h265Res = FfmpegCommandTest.class.getResource("/h265.mp4");
-        assertNotNull(h265Res);
-        h265 = Paths.get(h265Res.toURI()).toFile();
+        URL srcRes = FfmpegCommandTest.class.getResource("/src.mp4");
+        assertNotNull(srcRes);
+        src = Paths.get(srcRes.toURI()).toFile();
     }
 
     @BeforeEach
@@ -45,9 +47,10 @@ class FfmpegCommandTest {
         }
     }
 
-    @Test
-    void h265ToH264() {
-        assertTrue(h265.exists());
+    @ParameterizedTest
+    @MethodSource("getCodecs")
+    void codecs(VideoCodec codec) {
+        assertTrue(src.exists());
         new FfmpegCommand()
                 .addHandler(new ProgressHandler()
                         .addHandler(pi -> {
@@ -55,8 +58,8 @@ class FfmpegCommandTest {
                             assertTrue(pi.getProgress() <= 1);
                         }))
                 .setPreset(Preset.ULTRAFAST)
-                .addInput(h265)
-                .setCodec(VideoCodec.H264)
+                .addInput(src)
+                .setCodec(codec)
                 .setOutput(out)
                 .execute()
                 .waitFor();
@@ -64,60 +67,7 @@ class FfmpegCommandTest {
         assertNotEquals(0, out.length());
     }
 
-    @Test
-    void h265ToH264Nvenc() {
-        assertTrue(h265.exists());
-        new FfmpegCommand()
-                .addHandler(new ProgressHandler()
-                        .addHandler(pi -> {
-                            assertTrue(pi.getProgress() >= 0);
-                            assertTrue(pi.getProgress() <= 1);
-                        }))
-                .setPreset(Preset.ULTRAFAST)
-                .addInput(h265)
-                .setCodec(VideoCodec.H264_NVENC)
-                .setOutput(out)
-                .execute()
-                .waitFor();
-        assertTrue(out.exists());
-        assertNotEquals(0, out.length());
-    }
-
-    @Test
-    void h264ToH265() {
-        assertTrue(h264.exists());
-        new FfmpegCommand()
-                .addHandler(new ProgressHandler()
-                        .addHandler(pi -> {
-                            assertTrue(pi.getProgress() >= 0);
-                            assertTrue(pi.getProgress() <= 1);
-                        }))
-                .setPreset(Preset.ULTRAFAST)
-                .addInput(h264)
-                .setCodec(VideoCodec.H265)
-                .setOutput(out)
-                .execute()
-                .waitFor();
-        assertTrue(out.exists());
-        assertNotEquals(0, out.length());
-    }
-
-    @Test
-    void h264ToH265Nvenc() {
-        assertTrue(h264.exists());
-        new FfmpegCommand()
-                .addHandler(new ProgressHandler()
-                        .addHandler(pi -> {
-                            assertTrue(pi.getProgress() >= 0);
-                            assertTrue(pi.getProgress() <= 1);
-                        }))
-                .setPreset(Preset.ULTRAFAST)
-                .addInput(h264)
-                .setCodec(VideoCodec.HEVC_NVENC)
-                .setOutput(out)
-                .execute()
-                .waitFor();
-        assertTrue(out.exists());
-        assertNotEquals(0, out.length());
+    static List<VideoCodec> getCodecs() {
+        return VideoCodec.getNeededCodecs();
     }
 }

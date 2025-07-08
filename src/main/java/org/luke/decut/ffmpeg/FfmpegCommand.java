@@ -279,7 +279,7 @@ public class FfmpegCommand implements CommandPart {
 
     @Override
     public String apply(FfmpegCommand command) {
-        return apply(command, "ffmpeg");
+        return apply(command, getFfmpegBinary());
     }
 
     public static boolean systemFfmpeg() {
