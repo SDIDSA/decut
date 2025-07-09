@@ -57,10 +57,6 @@ public class AppRoot extends BorderPane implements Styleable {
 		setBackground(Backgrounds.make(fill));
 	}
 
-	public void setBorderFill(Paint fill, double width) {
-		//setBorder(Borders.make(fill, 0, width));
-	}
-
 	private Page old = null;
 	public void setContent(Page page) {
 		if (old != null) {

@@ -2,6 +2,7 @@ package org.luke.decut.app.lib.assets.display;
 
 import javafx.stage.FileChooser;
 import org.luke.decut.app.lib.assets.filter.AssetType;
+import org.luke.gui.threading.Platform;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class ExtensionFilters {
     private static FileChooser.ExtensionFilter audio;
     private static FileChooser.ExtensionFilter image;
 
-    public static List<FileChooser.ExtensionFilter> getFilters() {
+    public synchronized static List<FileChooser.ExtensionFilter> getFilters() {
         if(filters == null) {
             filters = new ArrayList<>();
 
@@ -64,6 +65,8 @@ public class ExtensionFilters {
     }
 
     public static AssetType typeOf(File file) {
+        if(filters == null) getFilters();
+        Platform.waitWhile(() -> video == null);
         if(isOfType(file, video)) {
             return AssetType.VIDEO;
         } else if(isOfType(file, audio)) {

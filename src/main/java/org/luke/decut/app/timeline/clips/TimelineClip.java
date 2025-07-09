@@ -82,24 +82,27 @@ public class TimelineClip extends Pane implements Styleable {
             double dx = mx - initX;
             double dt = owner.pixelToTime(dx);
             if (resizeOut) {
-                double newOut = Math.max(
+                double newOut = initOut + dt;
+                double timePos = owner.snapDrag(startTime.get() + newOut - inPoint.get());
+                newOut = timePos - startTime.get() + inPoint.get();
+                newOut = Math.max(
                         Math.min(
-                                owner.snapDrag(initOut + dt),
+                                newOut,
                                 sourceAsset.getDurationSeconds()),
                         inPoint.get());
                 if(newOut==outPoint.get()) return;
                 setOutPoint(newOut);
                 resolveCollision();
             } else if (resizeIn) {
-                double newIn = Math.max(
-                        Math.min(
-                                owner.snapDrag(initIn + dt),
-                                outPoint.get()),
+                double newStartTime = initStart + dt;
+                double snappedStartTime = owner.snapDrag(newStartTime);
+                double startTimeDelta = Math.max(0, snappedStartTime - initStart);
+                double newIn = initIn + startTimeDelta;
+                newIn = Math.max(
+                        Math.min(newIn, outPoint.get()),
                         0);
-                double inPointDelta = newIn - initIn;
-                double newStartTime = initStart + inPointDelta;
                 if(newIn == inPoint.get()) return;
-                setInPointAndStartTime(newIn, newStartTime);
+                setInPointAndStartTime(newIn, snappedStartTime);
                 resolveCollision();
             } else {
                 double newStartTime = Math.max(0, owner.snapDrag(initStart + dt));
@@ -178,6 +181,8 @@ public class TimelineClip extends Pane implements Styleable {
             double thisEndTime = getEndTime();
             double nextStartTime = nextClip.getStartTime();
 
+            System.out.println(thisEndTime + " : " + nextStartTime);
+
             if (thisEndTime > nextStartTime) {
                 double pushAmount = thisEndTime - nextStartTime;
                 pushClipForward(nextClip, pushAmount);
@@ -192,7 +197,6 @@ public class TimelineClip extends Pane implements Styleable {
 
             if (thisStartTime < prevEndTime) {
                 double pushAmount = prevEndTime - thisStartTime;
-                System.out.println(pushAmount);
                 pushClipForward(this, pushAmount);
             }
         }

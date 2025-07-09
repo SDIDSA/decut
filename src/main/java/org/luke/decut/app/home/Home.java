@@ -11,12 +11,14 @@ import org.luke.decut.app.home.menubar.FileMenu;
 import org.luke.decut.app.inspector.Inspector;
 import org.luke.decut.app.lib.*;
 import org.luke.decut.app.lib.assets.Assets;
+import org.luke.decut.app.lib.assets.data.AssetData;
 import org.luke.decut.app.preview.Preview;
 import org.luke.decut.app.timeline.controls.snap.SnapStrategy;
 import org.luke.decut.app.timeline.TimelinePane;
 import org.luke.decut.app.timeline.tracks.Tracks;
 import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
+import org.luke.decut.file.DecutProject;
 import org.luke.decut.render.TimelineRenderer;
 import org.luke.gui.controls.button.MenuBarButton;
 import org.luke.gui.style.Style;
@@ -233,6 +235,18 @@ public class Home extends Page {
 
     public double snapDrag(double seconds) {
         return snapStrategy.snap(this, seconds);
+    }
+
+    public DecutProject save() {
+        DecutProject proj = new DecutProject();
+        Assets assets = LibraryContent.getInstance(this, Assets.class);
+        proj.addAssets(assets.getGrid().getData().toArray(new AssetData[0]));
+        return proj;
+    }
+
+    public void load(DecutProject proj) {
+        Assets assets = LibraryContent.getInstance(this, Assets.class);
+        assets.getGrid().importFiles(proj.getAssets());
     }
 
     @Override

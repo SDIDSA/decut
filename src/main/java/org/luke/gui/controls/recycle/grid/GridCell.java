@@ -7,13 +7,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.layout.Pane;
 import org.luke.gui.style.SelectableStyleable;
 
-/**
- * An enhanced GridCell that provides better item management and lifecycle methods.
- * This class extends Pane to provide functionality for GridView items.
- *
- * @param <T> The type of item this cell represents
- * @author SDIDSA
- */
 public abstract class GridCell<T> extends Pane implements SelectableStyleable {
     private final ObjectProperty<T> item;
     private final BooleanProperty selected;
@@ -71,18 +64,8 @@ public abstract class GridCell<T> extends Pane implements SelectableStyleable {
         return selected;
     }
 
-    /**
-     * Updates the cell content with the given item.
-     * Subclasses must implement this method to define how items are displayed.
-     *
-     * @param item the item to display
-     */
     protected abstract void updateContent(T item);
 
-    /**
-     * Clear the cell content when no item is assigned.
-     * Override this method to provide custom cleanup logic.
-     */
     protected void clearContent() {
         // Default implementation - subclasses can override
     }

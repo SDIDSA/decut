@@ -46,10 +46,6 @@ public class AppPreRoot extends StackPane {
 		root.setFill(fill);
 	}
 	
-	public void setBorder(Paint fill, double width) {
-		root.setBorderFill(fill, width);
-	}
-	
 	public void setContent(Page page) {
 		root.setContent(page);
 	}

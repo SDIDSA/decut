@@ -200,4 +200,8 @@ public class AssetsDisplay extends StackPane {
 
         owner.perform("import assets", action, undo, true);
     }
+
+    public ObservableList<AssetData> getData() {
+        return data;
+    }
 }

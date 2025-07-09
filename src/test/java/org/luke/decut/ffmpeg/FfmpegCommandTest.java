@@ -3,15 +3,10 @@ package org.luke.decut.ffmpeg;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.luke.decut.ffmpeg.codec.Codec;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
-import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.preset.Preset;
 
 import java.io.File;
