@@ -24,7 +24,6 @@ import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.file.project.ClipData;
 import org.luke.decut.file.project.DecutProject;
-import org.luke.decut.file.project.TrackData;
 import org.luke.decut.render.TimelineRenderer;
 import org.luke.gui.controls.button.MenuBarButton;
 import org.luke.gui.style.Style;
