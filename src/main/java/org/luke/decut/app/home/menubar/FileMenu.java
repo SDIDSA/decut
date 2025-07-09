@@ -20,7 +20,7 @@ public class FileMenu extends HomeMenuButton {
         super(owner, "File");
 
         FileChooser fc = new FileChooser();
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Decut Project", "*.dcp"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Decut Project", "*.dcx"));
 
         addItem(new MetaMenuMenu("New", "new", null)
                     .add("Project", "file", null)
