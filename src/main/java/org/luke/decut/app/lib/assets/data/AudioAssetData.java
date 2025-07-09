@@ -93,4 +93,14 @@ public class AudioAssetData extends AssetData {
     public String getName() {
         return getFile().getName();
     }
+
+    @Override
+    public AssetData getParent() {
+        return null;
+    }
+
+    @Override
+    public boolean hasParent() {
+        return false;
+    }
 }

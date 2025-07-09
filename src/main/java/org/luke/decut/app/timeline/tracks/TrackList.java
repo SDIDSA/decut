@@ -53,11 +53,12 @@ public class TrackList extends VerticalScrollable implements Styleable {
         addTrack(TrackType.EFFECT);
     }
 
-    public void addTrack(TrackType type) {
+    public Track addTrack(TrackType type) {
         Track track = new Track(owner, type);
         owner.perform("add track",
                 () -> tracks.add(track),
                 () -> tracks.remove(track));
+        return track;
     }
 
     public Track addAudioTrackAt(int index) {
@@ -72,8 +73,9 @@ public class TrackList extends VerticalScrollable implements Styleable {
         return res;
     }
 
-    public void addTrackAt(Track track, int index) {
+    public Track addTrackAt(Track track, int index) {
         tracks.add(index, track);
+        return track;
     }
 
     public ObservableList<Track> getTracks() {

@@ -104,8 +104,16 @@ public class VideoAssetData extends AssetData {
             makeVid.waitFor();
             makeAud.waitFor();
         }
+    }
 
+    @Override
+    public boolean hasParent() {
+        return false;
+    }
 
+    @Override
+    public AssetData getParent() {
+        return null;
     }
 
     public String getName() {

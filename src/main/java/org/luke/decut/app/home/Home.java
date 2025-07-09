@@ -12,13 +12,19 @@ import org.luke.decut.app.inspector.Inspector;
 import org.luke.decut.app.lib.*;
 import org.luke.decut.app.lib.assets.Assets;
 import org.luke.decut.app.lib.assets.data.AssetData;
+import org.luke.decut.app.lib.assets.data.VideoAssetData;
+import org.luke.decut.app.lib.assets.filter.AssetType;
 import org.luke.decut.app.preview.Preview;
+import org.luke.decut.app.timeline.clips.TimelineClip;
 import org.luke.decut.app.timeline.controls.snap.SnapStrategy;
 import org.luke.decut.app.timeline.TimelinePane;
+import org.luke.decut.app.timeline.tracks.Track;
 import org.luke.decut.app.timeline.tracks.Tracks;
 import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
-import org.luke.decut.file.DecutProject;
+import org.luke.decut.file.project.ClipData;
+import org.luke.decut.file.project.DecutProject;
+import org.luke.decut.file.project.TrackData;
 import org.luke.decut.render.TimelineRenderer;
 import org.luke.gui.controls.button.MenuBarButton;
 import org.luke.gui.style.Style;
@@ -241,12 +247,34 @@ public class Home extends Page {
         DecutProject proj = new DecutProject();
         Assets assets = LibraryContent.getInstance(this, Assets.class);
         proj.addAssets(assets.getGrid().getData().toArray(new AssetData[0]));
+
+        proj.addTracks(timeline.getTracks().getTracks().toArray(new Track[0]));
         return proj;
     }
 
     public void load(DecutProject proj) {
         Assets assets = LibraryContent.getInstance(this, Assets.class);
-        assets.getGrid().importFiles(proj.getAssets());
+        assets.getGrid().importFiles(proj.getAssets(), () -> {
+            timeline.getTracks().getTrackList().getTracks().clear();
+            proj.getTimeline().forEach((i, t) -> {
+                Track track = timeline.getTracks().getTrackList().addTrackAt(new Track(this, t.getType()), i);
+                for (ClipData clipData : t) {
+                    AssetData data = AssetData.getData(clipData.getSource());
+                    if(data instanceof VideoAssetData parent) {
+                        if(clipData.getType() == AssetType.VIDEO) {
+                            data = parent.getVideo();
+                        } else if(clipData.getType() == AssetType.AUDIO) {
+                            data = parent.getAudio();
+                        }
+                    }
+                    TimelineClip clip = track.getContent().createClip(data, 0);
+                    clip.setStartTime(clipData.getStartTime());
+                    clip.setInPoint(clipData.getInPoint());
+                    clip.setOutPoint(clipData.getOutPoint());
+                    track.getContent().addClip(clip);
+                }
+            });
+        });
     }
 
     @Override

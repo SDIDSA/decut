@@ -28,14 +28,20 @@ public class SubAudioAssetData extends AudioAssetData {
         fetch();
     }
 
-    public VideoAssetData getParent() {
-        return parent;
-    }
-
     @Override
     public void fetch() {
         if(parent == null) return;
         super.fetch(false);
         duration = parent.duration;
+    }
+
+    @Override
+    public AssetData getParent() {
+        return parent;
+    }
+
+    @Override
+    public boolean hasParent() {
+        return true;
     }
 }

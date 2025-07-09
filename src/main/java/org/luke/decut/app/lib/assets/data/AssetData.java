@@ -8,7 +8,7 @@ import org.luke.decut.app.lib.assets.display.ExtensionFilters;
 import java.io.File;
 import java.util.Date;
 
-public class AssetData {
+public abstract class AssetData {
     protected final File file;
     protected final AssetType type;
     protected long updated;
@@ -68,4 +68,7 @@ public class AssetData {
     public boolean isThumbColored() {
         return this instanceof AudioAssetData;
     }
+
+    public abstract boolean hasParent();
+    public abstract AssetData getParent();
 }

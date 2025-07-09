@@ -64,4 +64,14 @@ public class ImageAssetData extends AssetData {
     public Image getImage() {
         return image;
     }
+
+    @Override
+    public AssetData getParent() {
+        return null;
+    }
+
+    @Override
+    public boolean hasParent() {
+        return false;
+    }
 }

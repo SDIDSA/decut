@@ -28,17 +28,22 @@ public class SubVideoAssetData extends VideoAssetData {
         fetch();
     }
 
-    public VideoAssetData getParent() {
-        return parent;
-    }
-
     public void fetch() {
         if(parent == null) return;
         super.fetch(false);
         duration = parent.duration;
         resolution = parent.resolution;
         thumb = parent.thumb;
+    }
 
+    @Override
+    public AssetData getParent() {
+        return parent;
+    }
+
+    @Override
+    public boolean hasParent() {
+        return true;
     }
 
 }

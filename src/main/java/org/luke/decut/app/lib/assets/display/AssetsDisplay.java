@@ -183,12 +183,16 @@ public class AssetsDisplay extends StackPane {
     }
 
     public void importFiles(List<File> files) {
+        importFiles(files, null);
+    }
 
+    public void importFiles(List<File> files, Runnable post) {
         Runnable action = () -> {
             LibraryContent.getInstance(owner, Assets.class).startLoading();
             Platform.runBack(files, AssetData::getData, is -> {
                 data.addAll(is.stream().filter(i -> !data.contains(i)).toList());
                 LibraryContent.getInstance(owner, Assets.class).stopLoading();
+                if(post != null) post.run();
             });
             refreshDisplay();
         };

@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import org.luke.decut.app.home.Home;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
-import org.luke.decut.file.DecutProject;
+import org.luke.decut.file.project.DecutProject;
 import org.luke.decut.file.FileDealer;
 import org.luke.gui.controls.popup.context.meta.MetaMenuItem;
 import org.luke.gui.controls.popup.context.meta.MetaMenuMenu;

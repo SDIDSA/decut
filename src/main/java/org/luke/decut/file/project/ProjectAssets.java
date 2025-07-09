@@ -1,4 +1,4 @@
-package org.luke.decut.file;
+package org.luke.decut.file.project;
 
 import org.json.JSONArray;
 
