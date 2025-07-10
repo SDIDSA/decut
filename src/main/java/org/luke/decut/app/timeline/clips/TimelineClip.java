@@ -80,7 +80,7 @@ public class TimelineClip extends Pane implements Styleable {
         setOnMouseDragged(event -> {
             double mx = event.getSceneX();
             double dx = mx - initX;
-            double dt = owner.pixelToTime(dx);
+            double dt = owner.pixelToTimeNoSnap(dx);
             if (resizeOut) {
                 double newOut = initOut + dt;
                 double timePos = owner.snapDrag(startTime.get() + newOut - inPoint.get());
@@ -92,25 +92,23 @@ public class TimelineClip extends Pane implements Styleable {
                         inPoint.get());
                 if(newOut==outPoint.get()) return;
                 setOutPoint(newOut);
-                resolveCollision();
+                resolveCollision(false);
             } else if (resizeIn) {
                 double newStartTime = initStart + dt;
                 double snappedStartTime = owner.snapDrag(newStartTime);
                 double startTimeDelta = Math.max(0, snappedStartTime) - initStart;
                 double newIn = initIn + startTimeDelta;
-                System.out.println(newIn);
                 newIn = Math.max(
                         Math.min(newIn, outPoint.get()),
                         0);
-                System.out.println(newIn);
                 if(newIn == inPoint.get()) return;
                 setInPointAndStartTime(newIn, snappedStartTime);
-                resolveCollision();
+                resolveCollision(false);
             } else {
                 double newStartTime = Math.max(0, owner.snapDrag(initStart + dt));
                 if (newStartTime != this.startTime.get()) {
                     setStartTime(newStartTime);
-                    resolveCollision();
+                    resolveCollision(true);
                 }
             }
         });
@@ -172,7 +170,7 @@ public class TimelineClip extends Pane implements Styleable {
         times.forEach(TimelineClip::setStartTime);
     }
 
-    private void resolveCollision() {
+    private void resolveCollision(boolean allowSwap) {
         List<TimelineClip> clips = track.getContent().getSortedClips();
         int currentIndex = clips.indexOf(this);
 
@@ -180,23 +178,38 @@ public class TimelineClip extends Pane implements Styleable {
 
         if (currentIndex + 1 < clips.size()) {
             TimelineClip nextClip = clips.get(currentIndex + 1);
-            double thisEndTime = getEndTime();
-            double nextStartTime = nextClip.getStartTime();
+            double thisEndTime = owner.snapToFrame(getEndTime());
+            double nextStartTime = initStartTimes.get(nextClip);
+            double nextEndTime = nextStartTime + nextClip.getDuration();
+            double nextMid = (nextStartTime + nextEndTime) / 2;
 
             if (thisEndTime > nextStartTime) {
-                double pushAmount = thisEndTime - nextStartTime;
-                pushClipForward(nextClip, pushAmount);
+                if(thisEndTime > nextMid && allowSwap) {
+                    double initS = nextStartTime - getDuration();
+                    nextClip.setStartTime(initS);
+                    setStartTime(initS + nextClip.getDuration());
+                } else {
+                    double pushAmount = thisEndTime - nextStartTime;
+                    pushClipForward(nextClip, pushAmount);
+                }
             }
         }
 
         if (currentIndex > 0) {
             TimelineClip prevClip = clips.get(currentIndex - 1);
-            double thisStartTime = getStartTime();
-            double prevEndTime = prevClip.getEndTime();
+            double thisStartTime = owner.snapToFrame(getStartTime());
+            double prevEndTime = owner.snapToFrame(prevClip.getEndTime());
+            double prevStartTime = owner.snapToFrame(prevClip.getStartTime());
+            double prevMid = (prevEndTime + prevStartTime) / 2;
 
             if (thisStartTime < prevEndTime) {
-                double pushAmount = prevEndTime - thisStartTime;
-                pushClipForward(this, pushAmount);
+                if(thisStartTime < prevMid && allowSwap) {
+                    prevClip.setStartTime(prevStartTime + duration);
+                    setStartTime(prevStartTime);
+                } else {
+                    double pushAmount = prevEndTime - thisStartTime;
+                    pushClipForward(this, pushAmount);
+                }
             }
         }
 
@@ -275,7 +288,7 @@ public class TimelineClip extends Pane implements Styleable {
     void setInPointAndStartTimeInternal(double newInPoint, double newStartTime) {
         this.inPoint.set(owner.snapToFrame(newInPoint));
         this.startTime.set(owner.snapToFrame(newStartTime));
-        this.duration = outPoint.get() - newInPoint;
+        this.duration = outPoint.get() - inPoint.get();
         updateUIPosition();
     }
 

@@ -9,7 +9,7 @@ import org.luke.gui.window.Window;
 public class TimelineButton extends ColoredIconButton {
     public TimelineButton(Window owner, String iconFile, String tooltip) {
         super(owner,
-                5, 36, 36,
+                5, 30, 30,
                 iconFile, 18,
                 Style::getNothing, Style::getTextNormal);
 

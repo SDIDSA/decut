@@ -118,6 +118,9 @@ public class TrackContent extends Pane implements Styleable {
     }
 
     public SortedList<TimelineClip> getSortedClips() {
+        Comparator<? super TimelineClip> comp = sortedClips.getComparator();
+        sortedClips.setComparator(null);
+        sortedClips.setComparator(comp);
         return sortedClips;
     }
 

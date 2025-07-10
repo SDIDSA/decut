@@ -1,50 +1,63 @@
 package org.luke.decut.file.project;
 
 import org.json.JSONObject;
-import org.luke.decut.app.lib.assets.data.AssetData;
-import org.luke.decut.app.timeline.tracks.Track;
+import org.luke.decut.app.home.Home;
 
-public class DecutProject {
+public class DecutProject implements ProjectPart {
     public static final String ASSETS = "assets";
     public static final String TIMELINE = "timeline";
+    public static final String PROPERTIES = "properties";
 
     private final ProjectAssets assets;
-    private final TimelineData timeline;
+    private final ProjectTimeline timeline;
+    private final ProjectProperties properties;
 
     public DecutProject() {
         assets = new ProjectAssets();
-        timeline = new TimelineData();
+        timeline = new ProjectTimeline();
+        properties = new ProjectProperties();
     }
 
     public ProjectAssets getAssets() {
         return assets;
     }
 
-    public TimelineData getTimeline() {
+    public ProjectTimeline getTimeline() {
         return timeline;
     }
 
-    public void addAssets(AssetData...assets) {
-        for (AssetData asset : assets) {
-            this.assets.add(asset.getFile());
-        }
+    public ProjectProperties getProperties() {
+        return properties;
     }
 
-    public void addTracks(Track...tracks) {
-        for (Track track : tracks) {
-            timeline.add(new TrackData(track));
-        }
+    @Override
+    public void save(Home owner) {
+        assets.save(owner);
+        timeline.save(owner);
+        properties.save(owner);
+    }
+
+    @Override
+    public void load(Home owner) {
+        assets.load(owner);
+        timeline.load(owner);
+        properties.load(owner);
     }
 
     public JSONObject serialize() {
         return new JSONObject()
                 .put(ASSETS, assets.serialize())
-                .put(TIMELINE, timeline.serialize());
+                .put(TIMELINE, timeline.serialize())
+                .put(PROPERTIES, properties.serialize());
     }
 
     public void deserialize(JSONObject object) {
-        assets.deserialize(object.getJSONArray(ASSETS));
-        timeline.deserialize(object.getJSONObject(TIMELINE));
+        if (object.has(ASSETS))
+            assets.deserialize(object.getJSONArray(ASSETS));
+        if (object.has(TIMELINE))
+            timeline.deserialize(object.getJSONObject(TIMELINE));
+        if (object.has(PROPERTIES))
+            properties.deserialize(object.getJSONObject(PROPERTIES));
     }
 
     @Override
