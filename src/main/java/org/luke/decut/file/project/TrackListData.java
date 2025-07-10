@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.BiConsumer;
 
-public class ProjectTimeline extends ArrayList<TrackData> implements ProjectPart {
+public class TrackListData extends ArrayList<TrackData> implements ProjectPart {
 
     public JSONObject serialize() {
         JSONObject arr = new JSONObject();

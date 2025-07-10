@@ -9,12 +9,12 @@ public class DecutProject implements ProjectPart {
     public static final String PROPERTIES = "properties";
 
     private final ProjectAssets assets;
-    private final ProjectTimeline timeline;
+    private final TimelineData timeline;
     private final ProjectProperties properties;
 
     public DecutProject() {
         assets = new ProjectAssets();
-        timeline = new ProjectTimeline();
+        timeline = new TimelineData();
         properties = new ProjectProperties();
     }
 
@@ -22,7 +22,7 @@ public class DecutProject implements ProjectPart {
         return assets;
     }
 
-    public ProjectTimeline getTimeline() {
+    public TimelineData getTimeline() {
         return timeline;
     }
 

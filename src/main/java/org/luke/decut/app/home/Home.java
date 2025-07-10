@@ -247,9 +247,7 @@ public class Home extends Page {
     }
 
     public void load(DecutProject proj) {
-        Platform.runLater(() -> {
-            proj.load(this);
-        });
+        proj.load(this);
     }
 
     @Override

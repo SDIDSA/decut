@@ -37,6 +37,7 @@ public class TimelineClip extends Pane implements Styleable {
     private double initOut;
     private double initIn;
     private HashMap<TimelineClip, Double> initStartTimes;
+    private HashMap<TimelineClip, Double> currentStartTimes;
 
     public TimelineClip(Home owner, Track track, AssetData sourceAsset, double prestart) {
         this.owner = owner;
@@ -75,6 +76,7 @@ public class TimelineClip extends Pane implements Styleable {
             initIn = inPoint.get();
             initStart = this.startTime.get();
             initStartTimes = saveStartTimes();
+            currentStartTimes = new HashMap<>(initStartTimes);
         });
 
         setOnMouseDragged(event -> {
@@ -90,7 +92,7 @@ public class TimelineClip extends Pane implements Styleable {
                                 newOut,
                                 sourceAsset.getDurationSeconds()),
                         inPoint.get());
-                if(newOut==outPoint.get()) return;
+                if (newOut == outPoint.get()) return;
                 setOutPoint(newOut);
                 resolveCollision(false);
             } else if (resizeIn) {
@@ -101,7 +103,7 @@ public class TimelineClip extends Pane implements Styleable {
                 newIn = Math.max(
                         Math.min(newIn, outPoint.get()),
                         0);
-                if(newIn == inPoint.get()) return;
+                if (newIn == inPoint.get()) return;
                 setInPointAndStartTime(newIn, snappedStartTime);
                 resolveCollision(false);
             } else {
@@ -128,7 +130,7 @@ public class TimelineClip extends Pane implements Styleable {
                             setOutPoint(oldOut);
                             applyStartTimes(oldStarts);
                         });
-            }else if (inPoint.get() != initIn) {
+            } else if (inPoint.get() != initIn) {
                 double newIn = inPoint.get();
                 HashMap<TimelineClip, Double> newStarts = saveStartTimes();
                 double oldIn = initIn;
@@ -142,7 +144,7 @@ public class TimelineClip extends Pane implements Styleable {
                             setInPoint(oldIn);
                             applyStartTimes(oldStarts);
                         });
-            } else if(startTime.get() != initStart) {
+            } else if (startTime.get() != initStart) {
                 HashMap<TimelineClip, Double> newStarts = saveStartTimes();
                 HashMap<TimelineClip, Double> oldStarts = new HashMap<>(initStartTimes);
                 owner.perform("Move clip",
@@ -175,42 +177,48 @@ public class TimelineClip extends Pane implements Styleable {
         int currentIndex = clips.indexOf(this);
 
         if (currentIndex == -1) return;
-
         if (currentIndex + 1 < clips.size()) {
             TimelineClip nextClip = clips.get(currentIndex + 1);
             double thisEndTime = owner.snapToFrame(getEndTime());
-            double nextStartTime = initStartTimes.get(nextClip);
+            double nextStartTime = currentStartTimes.get(nextClip);
             double nextEndTime = nextStartTime + nextClip.getDuration();
             double nextMid = (nextStartTime + nextEndTime) / 2;
 
-            if (thisEndTime > nextStartTime) {
-                if(thisEndTime > nextMid && allowSwap) {
-                    double initS = nextStartTime - getDuration();
-                    nextClip.setStartTime(initS);
-                    setStartTime(initS + nextClip.getDuration());
-                } else {
-                    double pushAmount = thisEndTime - nextStartTime;
-                    pushClipForward(nextClip, pushAmount);
-                }
+            if (thisEndTime > nextMid && allowSwap) {
+                double initS = nextStartTime - getDuration();
+                nextClip.setStartTime(initS);
+                setStartTime(initS + nextClip.getDuration());
+
+                currentStartTimes.put(this, getStartTime());
+                currentStartTimes.put(nextClip, nextClip.getStartTime());
+
+                clips = track.getContent().getSortedClips();
+                currentIndex = clips.indexOf(this);
+            } else if (thisEndTime > nextClip.getStartTime()) {
+                double pushAmount = thisEndTime - nextStartTime;
+                pushClipForward(nextClip, pushAmount);
             }
+
         }
 
         if (currentIndex > 0) {
             TimelineClip prevClip = clips.get(currentIndex - 1);
             double thisStartTime = owner.snapToFrame(getStartTime());
-            double prevEndTime = owner.snapToFrame(prevClip.getEndTime());
-            double prevStartTime = owner.snapToFrame(prevClip.getStartTime());
+            double prevStartTime = currentStartTimes.get(prevClip);
+            double prevEndTime = prevStartTime + prevClip.getDuration();
             double prevMid = (prevEndTime + prevStartTime) / 2;
 
-            if (thisStartTime < prevEndTime) {
-                if(thisStartTime < prevMid && allowSwap) {
-                    prevClip.setStartTime(prevStartTime + duration);
-                    setStartTime(prevStartTime);
-                } else {
-                    double pushAmount = prevEndTime - thisStartTime;
-                    pushClipForward(this, pushAmount);
-                }
+            if (thisStartTime < prevMid && allowSwap) {
+                prevClip.setStartTime(prevStartTime + getDuration());
+                setStartTime(prevStartTime);
+
+                currentStartTimes.put(this, getStartTime());
+                currentStartTimes.put(prevClip, prevClip.getStartTime());
+            } else if (thisStartTime < prevClip.getEndTime()) {
+                double pushAmount = prevEndTime - thisStartTime;
+                pushClipForward(this, pushAmount);
             }
+
         }
 
         resetStartTimes();
@@ -222,7 +230,7 @@ public class TimelineClip extends Pane implements Styleable {
 
         for (int i = currentIndex + 1; i < clips.size(); i++) {
             TimelineClip clip = clips.get(i);
-            double originalStartTime = initStartTimes.get(clip);
+            double originalStartTime = currentStartTimes.get(clip);
             double currentStartTime = clip.getStartTime();
 
             if (currentStartTime > originalStartTime) {

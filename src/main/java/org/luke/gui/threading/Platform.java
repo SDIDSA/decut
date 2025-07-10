@@ -154,19 +154,17 @@ public class Platform {
     }
 
     public static <U, V> void runBack(List<U> input, Function<U, V> transform, Consumer<List<V>> post) {
-        back.execute(() -> {
-            List<CompletableFuture<V>> futures = input.stream()
-                    .map(item -> CompletableFuture.supplyAsync(() -> safeFunction(transform).apply(item), back))
-                    .toList();
+        List<CompletableFuture<V>> futures = input.stream()
+                .map(item -> CompletableFuture.supplyAsync(() -> safeFunction(transform).apply(item), back))
+                .toList();
 
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(v -> futures.stream()
-                            .map(CompletableFuture::join)
-                            .collect(Collectors.toList()))
-                    .thenAccept(results -> {
-                        if (post != null) runLater(() -> post.accept(results));
-                    });
-        });
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList()))
+                .thenAccept(results -> {
+                    if (post != null) runLater(() -> post.accept(results));
+                });
     }
 
     public static void runBack(Runnable action) {
