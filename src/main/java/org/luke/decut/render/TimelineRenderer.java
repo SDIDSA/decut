@@ -215,7 +215,7 @@ public class TimelineRenderer {
 
             command.addComplexFilterNode(new ComplexFilterNode()
                     .setInput("[" + inputIdx + ":a]")
-                    .addFilter(new ATrimC(clip.getInPoint(), clip.getOutPoint()))
+                    .addFilter(new ATrimC(clip.getInPoint(), clip.getDuration()))
                     .addFilter(new ASetPts().setExpr("PTS-STARTPTS"))
                     .setOutput(trimmedLabel));
 
