@@ -52,7 +52,6 @@ public class LinkedGroupsData extends ArrayList<LinkedGroupData> implements Proj
             }
         }
         addAll(groupsData);
-        System.out.println(serialize());
     }
 
     @Override

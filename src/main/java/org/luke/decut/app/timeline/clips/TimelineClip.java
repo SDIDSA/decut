@@ -13,7 +13,10 @@ import org.luke.gui.style.Style;
 import org.luke.gui.style.Styleable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TimelineClip extends Pane implements Styleable {
     private final AssetData sourceAsset;
@@ -94,7 +97,7 @@ public class TimelineClip extends Pane implements Styleable {
                         inPoint.get());
                 if (newOut == outPoint.get()) return;
                 setOutPoint(newOut);
-                resolveCollision(false);
+                preResolve();
             } else if (resizeIn) {
                 double newStartTime = initStart + dt;
                 double snappedStartTime = owner.snapDrag(newStartTime);
@@ -105,12 +108,12 @@ public class TimelineClip extends Pane implements Styleable {
                         0);
                 if (newIn == inPoint.get()) return;
                 setInPointAndStartTime(newIn, snappedStartTime);
-                resolveCollision(false);
+                preResolve();
             } else {
                 double newStartTime = Math.max(0, owner.snapDrag(initStart + dt));
                 if (newStartTime != this.startTime.get()) {
                     setStartTime(newStartTime);
-                    resolveCollision(true);
+                    preResolve();
                 }
             }
         });
@@ -160,123 +163,68 @@ public class TimelineClip extends Pane implements Styleable {
         applyStyle(owner.getWindow().getStyl());
     }
 
+    public void preResolve() {
+        resetTimes();
+        resolveCollision();
+    }
+
+    public void resolveCollision() {
+        Set<Track> tracks = currentStartTimes.keySet().stream().map(TimelineClip::getTrack).collect(Collectors.toSet());
+        for (Track track : tracks) {
+            if(resolveCollision(track)) {
+                resolveCollision();
+                return;
+            }
+        }
+    }
+
+    public boolean resolveCollision(Track track) {
+        List<TimelineClip> clips = track.getContent().getSortedClips();
+        for (int i = 0; i < clips.size() - 1; i++) {
+            TimelineClip clip = clips.get(i);
+            TimelineClip next = clips.get(i + 1);
+            if(clip.getEndTime() > next.getStartTime()) {
+                next.setStartTime(clip.getEndTime());
+                return true;
+            }
+        }
+        return false;
+    }
+
     private HashMap<TimelineClip, Double> saveStartTimes() {
         HashMap<TimelineClip, Double> res = new HashMap<>();
-        for (TimelineClip clip : track.getContent().getClips()) {
-            res.put(clip, clip.getStartTime());
+        HashSet<Track> tracks = new HashSet<>();
+        if(isLinked()) {
+            linkedGroup.getClips().forEach(c -> tracks.add(c.getTrack()));
+        } else {
+            tracks.add(track);
         }
+        tracks.forEach(t -> {
+            t.getContent().getClips().forEach(c -> {
+                if(c.isLinked()) {
+                    c.linkedGroup.getClips().forEach(lc -> tracks.add(lc.getTrack()));
+                }
+            });
+        });
+        tracks.forEach(track -> {
+            track.getContent().getClips().forEach(clip -> {
+                res.put(clip, clip.getStartTime());
+            });
+        });
         return res;
+    }
+
+    private void resetTimes() {
+        initStartTimes.forEach((clip, start) -> {
+            if(clip == this || (isLinked() && linkedGroup.getClips().contains(clip))) {
+                return;
+            }
+            clip.setStartTime(start);
+        });
     }
 
     private void applyStartTimes(HashMap<TimelineClip, Double> times) {
         times.forEach(TimelineClip::setStartTime);
-    }
-
-    private void resolveCollision(boolean allowSwap) {
-        List<TimelineClip> clips = track.getContent().getSortedClips();
-        int currentIndex = clips.indexOf(this);
-
-        if (currentIndex == -1) return;
-        if (currentIndex + 1 < clips.size()) {
-            TimelineClip nextClip = clips.get(currentIndex + 1);
-            double thisEndTime = owner.snapToFrame(getEndTime());
-            double nextStartTime = currentStartTimes.get(nextClip);
-            double nextEndTime = nextStartTime + nextClip.getDuration();
-            double nextMid = (nextStartTime + nextEndTime) / 2;
-
-            if (thisEndTime > nextMid && allowSwap) {
-                double initS = nextStartTime - getDuration();
-                nextClip.setStartTime(initS);
-                setStartTime(initS + nextClip.getDuration());
-
-                currentStartTimes.put(this, getStartTime());
-                currentStartTimes.put(nextClip, nextClip.getStartTime());
-
-                clips = track.getContent().getSortedClips();
-                currentIndex = clips.indexOf(this);
-            } else if (thisEndTime > nextClip.getStartTime()) {
-                double pushAmount = thisEndTime - nextStartTime;
-                pushClipForward(nextClip, pushAmount);
-            }
-
-        }
-
-        if (currentIndex > 0) {
-            TimelineClip prevClip = clips.get(currentIndex - 1);
-            double thisStartTime = owner.snapToFrame(getStartTime());
-            double prevStartTime = currentStartTimes.get(prevClip);
-            double prevEndTime = prevStartTime + prevClip.getDuration();
-            double prevMid = (prevEndTime + prevStartTime) / 2;
-
-            if (thisStartTime < prevMid && allowSwap) {
-                prevClip.setStartTime(prevStartTime + getDuration());
-                setStartTime(prevStartTime);
-
-                currentStartTimes.put(this, getStartTime());
-                currentStartTimes.put(prevClip, prevClip.getStartTime());
-            } else if (thisStartTime < prevClip.getEndTime()) {
-                double pushAmount = prevEndTime - thisStartTime;
-                pushClipForward(this, pushAmount);
-            }
-
-        }
-
-        resetStartTimes();
-    }
-
-    private void resetStartTimes() {
-        List<TimelineClip> clips = track.getContent().getSortedClips();
-        int currentIndex = clips.indexOf(this);
-
-        for (int i = currentIndex + 1; i < clips.size(); i++) {
-            TimelineClip clip = clips.get(i);
-            double originalStartTime = currentStartTimes.get(clip);
-            double currentStartTime = clip.getStartTime();
-
-            if (currentStartTime > originalStartTime) {
-                double desiredStartTime = originalStartTime;
-
-                if (i > 0) {
-                    TimelineClip prevClip = clips.get(i - 1);
-                    double prevEndTime = prevClip.getEndTime();
-                    desiredStartTime = Math.max(desiredStartTime, prevEndTime);
-                }
-
-                desiredStartTime = Math.max(desiredStartTime, 0);
-
-                desiredStartTime = owner.snapToFrame(desiredStartTime);
-
-                if (desiredStartTime < currentStartTime) {
-                    clip.setStartTime(desiredStartTime);
-                }
-            }
-        }
-    }
-
-    private void pushClipForward(TimelineClip clip, double pushAmount) {
-        double newStartTime = owner.snapToFrame(clip.getStartTime() + pushAmount);
-        clip.setStartTime(newStartTime);
-
-        List<TimelineClip> clips = track.getContent().getSortedClips();
-        int clipIndex = clips.indexOf(clip);
-
-        if (clipIndex + 1 < clips.size()) {
-            TimelineClip nextClip = clips.get(clipIndex + 1);
-            if (clip.getEndTime() > nextClip.getStartTime()) {
-                double nextPushAmount = clip.getEndTime() - nextClip.getStartTime();
-                pushClipForward(nextClip, nextPushAmount);
-            }
-        }
-    }
-
-    private void setGroupOpacity(double opacity) {
-        if (linkedGroup == null) {
-            setOpacity(opacity);
-        } else {
-            for (TimelineClip clip : linkedGroup.getClips()) {
-                clip.setOpacity(opacity);
-            }
-        }
     }
 
     private void updateUIPosition() {
