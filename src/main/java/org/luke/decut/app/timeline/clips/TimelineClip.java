@@ -3,7 +3,9 @@ package org.luke.decut.app.timeline.clips;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Cursor;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import org.luke.decut.app.home.Home;
 import org.luke.decut.app.lib.assets.data.AssetData;
 import org.luke.decut.app.timeline.tracks.Track;
@@ -12,10 +14,7 @@ import org.luke.gui.factory.Borders;
 import org.luke.gui.style.Style;
 import org.luke.gui.style.Styleable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TimelineClip extends Pane implements Styleable {
@@ -41,6 +40,7 @@ public class TimelineClip extends Pane implements Styleable {
     private double initIn;
     private HashMap<TimelineClip, Double> initStartTimes;
     private HashMap<TimelineClip, Double> currentStartTimes;
+    private List<TimelineClip> initOrder;
 
     public TimelineClip(Home owner, Track track, AssetData sourceAsset, double prestart) {
         this.owner = owner;
@@ -74,12 +74,14 @@ public class TimelineClip extends Pane implements Styleable {
         });
 
         setOnMousePressed(event -> {
+            focus();
             initX = event.getSceneX();
             initOut = outPoint.get();
             initIn = inPoint.get();
             initStart = this.startTime.get();
             initStartTimes = saveStartTimes();
             currentStartTimes = new HashMap<>(initStartTimes);
+            initOrder = initStartTimes.keySet().stream().sorted(Comparator.comparing(TimelineClip::getStartTime)).toList();
         });
 
         setOnMouseDragged(event -> {
@@ -119,6 +121,7 @@ public class TimelineClip extends Pane implements Styleable {
         });
 
         setOnMouseReleased(_ -> {
+            unfocus();
             if (outPoint.get() != initOut) {
                 double newOut = outPoint.get();
                 HashMap<TimelineClip, Double> newStarts = saveStartTimes();
@@ -163,6 +166,31 @@ public class TimelineClip extends Pane implements Styleable {
         applyStyle(owner.getWindow().getStyl());
     }
 
+    public void focus() {
+        if(isLinked()) {
+            linkedGroup.getClips().forEach(TimelineClip::focusInternal);
+        }else {
+            focusInternal();
+        }
+    }
+
+    public void unfocus() {
+        if(isLinked()) {
+            linkedGroup.getClips().forEach(TimelineClip::unfocusInternal);
+        }else {
+            unfocusInternal();
+        }
+    }
+
+    public void focusInternal() {
+        toFront();
+        setEffect(new DropShadow(15, Color.gray(1, 0.4)));
+    }
+
+    public void unfocusInternal() {
+        setEffect(null);
+    }
+
     public void preResolve() {
         resetTimes();
         resolveCollision();
@@ -171,7 +199,7 @@ public class TimelineClip extends Pane implements Styleable {
     public void resolveCollision() {
         Set<Track> tracks = currentStartTimes.keySet().stream().map(TimelineClip::getTrack).collect(Collectors.toSet());
         for (Track track : tracks) {
-            if(resolveCollision(track)) {
+            if (resolveCollision(track)) {
                 resolveCollision();
                 return;
             }
@@ -179,11 +207,16 @@ public class TimelineClip extends Pane implements Styleable {
     }
 
     public boolean resolveCollision(Track track) {
-        List<TimelineClip> clips = track.getContent().getSortedClips();
+        List<TimelineClip> clips = track.getContent().getClips().sorted(
+                Comparator.comparing(TimelineClip::getStartTime)
+                        .thenComparing((c1, c2) -> {
+                            return (isThis(c1) && !isThis(c2)) ? -1 : (isThis(c2) && !isThis(c1)) ? 1 : 0;
+                        })
+                        .thenComparing(initOrder::indexOf));
         for (int i = 0; i < clips.size() - 1; i++) {
             TimelineClip clip = clips.get(i);
             TimelineClip next = clips.get(i + 1);
-            if(clip.getEndTime() > next.getStartTime()) {
+            if (clip.getEndTime() > next.getStartTime()) {
                 next.setStartTime(clip.getEndTime());
                 return true;
             }
@@ -191,17 +224,21 @@ public class TimelineClip extends Pane implements Styleable {
         return false;
     }
 
+    public boolean isThis(TimelineClip clip) {
+        return clip == this || (clip.isLinked() && clip.getLinkedGroup() == linkedGroup);
+    }
+
     private HashMap<TimelineClip, Double> saveStartTimes() {
         HashMap<TimelineClip, Double> res = new HashMap<>();
         HashSet<Track> tracks = new HashSet<>();
-        if(isLinked()) {
+        if (isLinked()) {
             linkedGroup.getClips().forEach(c -> tracks.add(c.getTrack()));
         } else {
             tracks.add(track);
         }
         tracks.forEach(t -> {
             t.getContent().getClips().forEach(c -> {
-                if(c.isLinked()) {
+                if (c.isLinked()) {
                     c.linkedGroup.getClips().forEach(lc -> tracks.add(lc.getTrack()));
                 }
             });
@@ -216,7 +253,7 @@ public class TimelineClip extends Pane implements Styleable {
 
     private void resetTimes() {
         initStartTimes.forEach((clip, start) -> {
-            if(clip == this || (isLinked() && linkedGroup.getClips().contains(clip))) {
+            if (clip == this || (isLinked() && linkedGroup.getClips().contains(clip))) {
                 return;
             }
             clip.setStartTime(start);
