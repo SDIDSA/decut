@@ -54,15 +54,16 @@ public class FfmpegCommand implements CommandPart {
     }
 
     private FfmpegCommand execute(String ffmpegBinary) {
-        String com = apply(this, ffmpegBinary);
-        running = new Command(this::handleLine, this::handleLine, com).addOnExit(_ -> {
+        String comStr = apply(this, ffmpegBinary);
+        Command com = new Command(this::handleLine, this::handleLine, comStr).addOnExit(_ -> {
             if (output != null && output.exists() && output.length() > 0) {
                 if (onOutput != null) {
                     onOutput.accept(output);
                 }
                 outputHandled = true;
             }
-        }).execute(new File("/"));
+        });
+        running = com.execute(new File("/"));
         return this;
     }
 
@@ -85,7 +86,7 @@ public class FfmpegCommand implements CommandPart {
             }
         }
 
-        LocalInstall ffmpeg = FfmpegManager.versionFromDir(ffmpegRoot);
+        LocalInstall ffmpeg = FfmpegManager.versionOf(ffmpegRoot.getAbsolutePath());
         if(ffmpeg == null) {
             return null;
         }
@@ -106,7 +107,7 @@ public class FfmpegCommand implements CommandPart {
                 throw new RuntimeException(e);
             }
 
-            Platform.waitWhile(() -> output != null && !outputHandled, 1000);
+            Platform.waitWhile(() -> output != null && onOutput != null && !outputHandled, 1000);
         }
         return this;
     }

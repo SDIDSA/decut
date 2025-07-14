@@ -18,6 +18,7 @@ import org.luke.decut.app.timeline.tracks.Tracks;
 import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.file.project.DecutProject;
+import org.luke.decut.render.SegmentRenderer;
 import org.luke.decut.render.TimelineRenderer;
 import org.luke.gui.controls.button.MenuBarButton;
 import org.luke.gui.style.Style;
@@ -42,6 +43,7 @@ public class Home extends Page {
     private final Inspector inspector;
 
     private final TimelineRenderer renderer;
+    private final SegmentRenderer previewer;
 
     private final DoubleProperty duration;
     private final DoubleProperty frameRate;
@@ -86,6 +88,7 @@ public class Home extends Page {
         inspector = new Inspector(this);
 
         renderer = new TimelineRenderer(this);
+        previewer = new SegmentRenderer(this);
 
         double thickness = 7;
 
@@ -153,7 +156,15 @@ public class Home extends Page {
     }
 
     public void perform(String name, Runnable action, Runnable inverse, boolean ffmpeg) {
-        edit.perform(name, action, inverse, ffmpeg);
+        edit.perform(name, () -> {
+            action.run();
+            pausePlayback();
+            clearPreviewCache();
+        }, () -> {
+            inverse.run();
+            pausePlayback();
+            clearPreviewCache();
+        }, ffmpeg);
     }
 
     public void perform(String name, Runnable action, Runnable inverse) {
@@ -162,6 +173,30 @@ public class Home extends Page {
 
     public FfmpegCommand render(File file) {
         return renderer.generateRenderCommand(file);
+    }
+
+    public FfmpegCommand previewFrames(File file, double startTime, double duration) {
+        return previewer.renderSegmentFrames(file, startTime, duration);
+    }
+
+    public FfmpegCommand previewAudio(File file, double startTime, double duration) {
+        return previewer.renderSegmentAudio(file, startTime, duration);
+    }
+
+    public void playPreview() {
+        preview.play();
+    }
+
+    public void pausePreview() {
+        preview.pause();
+    }
+
+    public void pausePlayback() {
+        timeline.pausePlayback();
+    }
+
+    public void clearPreviewCache() {
+        preview.clearCache();
     }
 
     public SnapStrategy getSnapStrategy() {

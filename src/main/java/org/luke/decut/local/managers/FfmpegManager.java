@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class FfmpegManager {
 
-	private static final HashMap<String, String> versionCache = new HashMap<>();
+	private static final HashMap<String, LocalInstall> versionCache = new HashMap<>();
 
 	private static final HashMap<String, String> installable;
 
@@ -125,7 +125,7 @@ public class FfmpegManager {
 			{
 				LocalInstall version = versionFromDir(sub);
 				if(version != null) {
-					versionCache.put(sub.getAbsolutePath(), version.getVersion());
+					versionCache.put(sub.getAbsolutePath(), version);
 				}
 			}
 		}
@@ -146,7 +146,7 @@ public class FfmpegManager {
 				LocalInstall version = versionFromDir(r);
 
 				if (!versionCache.containsKey(version.getRoot().getAbsolutePath()))
-					versionCache.put(version.getRoot().getAbsolutePath(), version.getVersion());
+					versionCache.put(version.getRoot().getAbsolutePath(), version);
 
                 res.add(version);
             }
@@ -162,7 +162,7 @@ public class FfmpegManager {
 		}
 	}
 
-	public static String versionOf(String path) {
+	public static LocalInstall versionOf(String path) {
 		return versionCache.get(path);
 	}
 

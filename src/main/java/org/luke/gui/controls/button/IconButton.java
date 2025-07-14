@@ -19,6 +19,10 @@ public class IconButton extends AbstractButton {
         applyStyle(window.getStyl());
     }
 
+    public void setIcon(String icon) {
+        this.icon.setImage(icon);
+    }
+
     public IconButton(Window window, double radius, double height, double width, String iconFile, double size) {
         this(window, new CornerRadii(radius), height, width, iconFile, size);
     }

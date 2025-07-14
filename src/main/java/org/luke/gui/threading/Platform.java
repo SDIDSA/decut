@@ -20,7 +20,7 @@ public class Platform {
     private static final Function<String, ExecutorService> poolMaker =
             (name) -> Executors.newCachedThreadPool(threadMaker.apply(name));
 
-    private static final ExecutorService back = poolMaker.apply("back_thread");
+    public static final ExecutorService back = poolMaker.apply("back_thread");
     private static final ExecutorService wait = poolMaker.apply("wait_thread");
 
     public static void runLater(Runnable r) {

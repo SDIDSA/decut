@@ -78,6 +78,10 @@ public class TimelinePane extends VBox implements Styleable {
         return timeline.ppsProperty();
     }
 
+    public void pausePlayback() {
+        controls.pausePlayback();
+    }
+
     @Override
     public void applyStyle(Style style) {
         setBackground(Backgrounds.make(style.getBackgroundTertiary(), new CornerRadii(2, 2,

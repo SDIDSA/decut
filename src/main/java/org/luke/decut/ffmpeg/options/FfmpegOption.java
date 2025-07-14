@@ -3,7 +3,7 @@ package org.luke.decut.ffmpeg.options;
 import org.luke.decut.ffmpeg.CommandPart;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 
-public abstract class FfmpegOption implements CommandPart {
+public class FfmpegOption implements CommandPart {
     private final String name;
     private String value;
 

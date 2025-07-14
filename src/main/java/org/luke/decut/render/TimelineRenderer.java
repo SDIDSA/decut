@@ -55,19 +55,15 @@ public class TimelineRenderer {
     public FfmpegCommand generateRenderCommand(File outputFile) {
         FfmpegCommand command = new FfmpegCommand();
 
-        // Set output file
         command.setOutput(outputFile);
 
-        // Set codecs
         command.setCodec(VideoCodec.H264);
         command.setCodec(new AudioCodec("aac"));
 
-        // Collect all clips from all tracks
         List<Track> tracks = getTracks();
         List<VideoClip> videoClips = new ArrayList<>();
         List<AudioClip> audioClips = new ArrayList<>();
 
-        // Separate video and audio clips
         for (Track track : tracks) {
             for (TimelineClip clip : getClips(track)) {
                 if (clip instanceof VideoClip) {
@@ -78,7 +74,6 @@ public class TimelineRenderer {
             }
         }
 
-        // Add input files to command
         Set<File> inputFiles = new HashSet<>();
         for (VideoClip clip : videoClips) {
             inputFiles.add(clip.getSourceAsset().getFile());
@@ -87,7 +82,6 @@ public class TimelineRenderer {
             inputFiles.add(clip.getSourceAsset().getFile());
         }
 
-        // Create a mapping from file to input index
         HashMap<File, Integer> fileToInputIndex = new HashMap<>();
         int inputIndex = 0;
         for (File file : inputFiles) {
@@ -95,18 +89,14 @@ public class TimelineRenderer {
             fileToInputIndex.put(file, inputIndex++);
         }
 
-        // Calculate timeline duration
         double timelineDuration = owner.durationProperty().get();
         command.setDuration((long) (timelineDuration * 1000));
         command.addOption(new Duration(timelineDuration));
 
-        // Process video clips
         String finalVideoLabel = processVideoClips(command, videoClips, fileToInputIndex, timelineDuration);
 
-        // Process audio clips
         String finalAudioLabel = processAudioClips(command, audioClips, fileToInputIndex, timelineDuration);
 
-        // Map final outputs - use null filter for pass-through
         if (finalVideoLabel != null && finalAudioLabel != null) {
             command.addOption(new Map(finalVideoLabel));
             command.addOption(new Map(finalAudioLabel));
@@ -119,29 +109,14 @@ public class TimelineRenderer {
         return command;
     }
 
-    /**
-     * Calculates the total duration of the timeline
-     */
-    private double calculateTimelineDuration() {
-        double maxDuration = 0;
-        for (Track track : getTracks()) {
-            for (TimelineClip clip : getClips(track)) {
-                double clipEnd = clip.getStartTime() + clip.getDuration();
-                maxDuration = Math.max(maxDuration, clipEnd);
-            }
-        }
-        return maxDuration;
-    }
-
     private String processVideoClips(FfmpegCommand command, List<VideoClip> videoClips,
                                      HashMap<File, Integer> fileToInputIndex, double timelineDuration) {
         if (videoClips.isEmpty()) {
             return null;
         }
 
-        // Sort video clips by timeline start time and track layer
         videoClips.sort((a, b) -> {
-            int layerCompare = Integer.compare(getTrackLayer(a), getTrackLayer(b));
+            int layerCompare = -Integer.compare(getTrackLayer(a), getTrackLayer(b));
             if (layerCompare != 0) return layerCompare;
             return Double.compare(a.getStartTime(), b.getStartTime());
         });
@@ -254,60 +229,4 @@ public class TimelineRenderer {
 
         return finalMixedAudioLabel;
     }
-    /**
-     * Processes all audio clips and creates the mixing chain
-     */
-//    private String processAudioClips(FfmpegCommand command, List<AudioClip> audioClips,
-//                                     HashMap<File, Integer> fileToInputIndex, double timelineDuration) {
-//        if (audioClips.isEmpty()) {
-//            return null;
-//        }
-//
-//        // Create a silent audio base for the full timeline duration
-//        String silenceLabel = "[silence]";
-//        command.addComplexFilterNode(new ComplexFilterNode()
-//                .addFilter(new AEvalSrc()
-//                        .setExprs("0")
-//                        .setDuration(String.valueOf(timelineDuration)))
-//                .setOutput(silenceLabel));
-//
-//        String currentAudioLabel = silenceLabel;
-//        int labelCounter = 0;
-//
-//        // Process each audio clip
-//        for (AudioClip clip : audioClips) {
-//            int inputIdx = fileToInputIndex.get(clip.getSourceAsset().getFile());
-//            String clipLabel = "[aclip_" + labelCounter + "]";
-//            String mixedLabel = "[amixed_" + labelCounter + "]";
-//
-//            // Trim the audio clip
-//            command.addComplexFilterNode(new ComplexFilterNode()
-//                    .setInput("[" + inputIdx + ":a]")
-//                    .addFilter(new ATrimC(clip.getInPoint(), clip.getOutPoint()))
-//                    .addFilter(new ASetPts().setExpr("PTS-STARTPTS"))
-//                    .setOutput(clipLabel));
-//
-//            // Add delay to position on timeline
-//            if (clip.getStartTime() > 0) {
-//                String delayedLabel = "[adelayed_" + labelCounter + "]";
-//                long delayMs = (long) (clip.getStartTime() * 1000);
-//                command.addComplexFilterNode(new ComplexFilterNode()
-//                        .setInput(clipLabel)
-//                        .addFilter(new ADelay(delayMs))
-//                        .setOutput(delayedLabel));
-//                clipLabel = delayedLabel;
-//            }
-//
-//            // Mix with current audio
-//            command.addComplexFilterNode(new ComplexFilterNode()
-//                    .setInputs(currentAudioLabel, clipLabel)
-//                    .addFilter(new AMix(2).setDuration("longest"))
-//                    .setOutput(mixedLabel));
-//
-//            currentAudioLabel = mixedLabel;
-//            labelCounter++;
-//        }
-//
-//        return currentAudioLabel;
-//    }
 }

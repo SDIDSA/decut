@@ -209,14 +209,16 @@ public class TimelineClip extends Pane implements Styleable {
     public boolean resolveCollision(Track track) {
         List<TimelineClip> clips = track.getContent().getClips().sorted(
                 Comparator.comparing(TimelineClip::getStartTime)
-                        .thenComparing((c1, c2) -> {
-                            return (isThis(c1) && !isThis(c2)) ? -1 : (isThis(c2) && !isThis(c1)) ? 1 : 0;
-                        })
+                        .thenComparing((c1, c2) ->
+                                (isThis(c1) && !isThis(c2)) ? -1 : (isThis(c2) && !isThis(c1)) ? 1 : 0)
                         .thenComparing(initOrder::indexOf));
+
         for (int i = 0; i < clips.size() - 1; i++) {
             TimelineClip clip = clips.get(i);
             TimelineClip next = clips.get(i + 1);
-            if (clip.getEndTime() > next.getStartTime()) {
+            if (owner.timeToFrame(clip.getEndTime()) > owner.timeToFrame(next.getStartTime())) {
+                System.out.println("collision happening " + clip + " : " + next);
+                System.out.println(clip.getEndTime() + " : " + next.getStartTime());
                 next.setStartTime(clip.getEndTime());
                 return true;
             }
@@ -248,6 +250,7 @@ public class TimelineClip extends Pane implements Styleable {
                 res.put(clip, clip.getStartTime());
             });
         });
+        System.out.println(res.size());
         return res;
     }
 

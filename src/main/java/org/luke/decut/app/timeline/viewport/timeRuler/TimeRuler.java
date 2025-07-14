@@ -85,7 +85,6 @@ public class TimeRuler extends Pane implements Styleable {
     }
 
     private void setupClickHandler() {
-        setOnMouseClicked(this::handleMouseClick);
         setOnMousePressed(this::handleMouseClick);
         setOnMouseDragged(this::handleMouseClick);
 
@@ -94,6 +93,7 @@ public class TimeRuler extends Pane implements Styleable {
     }
 
     private void handleMouseClick(MouseEvent event) {
+        owner.pausePlayback();
         if (pixelsPerSecond == null || pre == null || at == null) {
             return;
         }

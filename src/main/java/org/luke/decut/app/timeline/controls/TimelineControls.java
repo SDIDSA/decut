@@ -9,6 +9,7 @@ import org.luke.decut.app.timeline.controls.snap.SnapControl;
 import org.luke.gui.controls.space.ExpandingHSpace;
 
 public class TimelineControls extends HBox {
+    private final PlaybackControls playback;
 
     private final ZoomControls zoom;
 
@@ -26,13 +27,13 @@ public class TimelineControls extends HBox {
 
         zoom = new ZoomControls(owner);
 
-        PlaybackControls play = new PlaybackControls(owner);
+        playback = new PlaybackControls(owner);
 
         TimelineButton delete = new TimelineButton(owner.getWindow(),
                 "trash", "Remove clip");
 
 
-        getChildren().addAll(crop, frame, snap, new ExpandingHSpace(), play, new ExpandingHSpace(), zoom, delete);
+        getChildren().addAll(crop, frame, snap, new ExpandingHSpace(), playback, new ExpandingHSpace(), zoom, delete);
     }
 
     public DoubleProperty timeScale() {
@@ -41,6 +42,10 @@ public class TimelineControls extends HBox {
 
     public DoubleProperty timeScaleSource() {
         return zoom.source();
+    }
+
+    public void pausePlayback() {
+        playback.pausePlayback();
     }
 
 }

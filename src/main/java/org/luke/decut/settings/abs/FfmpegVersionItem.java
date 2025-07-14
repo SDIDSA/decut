@@ -11,7 +11,7 @@ public class FfmpegVersionItem extends MenuItem implements ComboItem {
 	private final String version;
 
 	public FfmpegVersionItem(ContextMenu menu, String text) {
-		super(menu, FfmpegManager.versionOf(text), "empty");
+		super(menu, FfmpegManager.versionOf(text).getVersion(), "empty");
 		removeIcon();
 		path = text;
 		version = lab.getText();
