@@ -113,6 +113,7 @@ public class Preview extends VBox implements Styleable {
         segments.clear();
         loadingSegments.values().forEach(cf -> cf.cancel(true));
         loadingSegments.clear();
+        view.setImage(null);
         if(currentSequence != null) {
             currentSequence = null;
             double at = owner.atProperty().get();
