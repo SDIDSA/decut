@@ -19,15 +19,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Preview extends VBox implements Styleable {
-    private static final double SEG_SIZE = 5; // Duration of each segment in seconds
+    private static final double SEG_SIZE = 3; // Duration of each segment in seconds
     private static final int PRELOAD_BUFFER = 2; // Number of segments to preload ahead/behind
-    private static final double AUDIO_SEEK_THRESHOLD = 0.03; // Only seek if difference > 50ms
 
     private final HashMap<Integer, FrameSequence> segments;
     private final HashMap<Integer, CompletableFuture<FrameSequence>> loadingSegments;
@@ -38,6 +40,11 @@ public class Preview extends VBox implements Styleable {
     private FrameSequence currentSequence;
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private final AnimationTimer frameTimer;
+
+    private SourceDataLine audioLine;
+    private final BlockingQueue<byte[]> audioQueue = new LinkedBlockingQueue<>();
+    private Thread audioThread;
+    private final AtomicBoolean isAudioRunning = new AtomicBoolean(false);
 
     // Audio synchronization
     private double lastAudioSeekTime = -1;
@@ -69,7 +76,36 @@ public class Preview extends VBox implements Styleable {
         setClip(clip);
 
         frameTimer = new AnimationTimer();
+        initAudio();
         applyStyle(owner.getWindow().getStyl());
+    }
+
+    private void initAudio() {
+        try {
+            AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+            audioLine = (SourceDataLine) AudioSystem.getLine(info);
+            audioLine.open(format);
+            audioLine.start();
+
+            isAudioRunning.set(true);
+            audioThread = new Thread(() -> {
+                try {
+                    while (isAudioRunning.get()) {
+                        byte[] buffer = audioQueue.take();
+                        audioLine.write(buffer, 0, buffer.length);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            audioThread.setDaemon(true);
+            audioThread.setName("Audio-Playback-Thread");
+            audioThread.start();
+
+        } catch (LineUnavailableException e) {
+            ErrorHandler.handle(e, "Failed to initialize audio line");
+        }
     }
 
     public void clearCache() {
@@ -92,9 +128,6 @@ public class Preview extends VBox implements Styleable {
         }
         if (index == currentSegment && currentSequence != null) {
             updateFrameOnly(time);
-            if (!isPlaying.get() || Math.abs(time - lastAudioSeekTime) > AUDIO_SEEK_THRESHOLD) {
-                updateAudioPosition(time);
-            }
             return;
         }
 
@@ -122,10 +155,6 @@ public class Preview extends VBox implements Styleable {
     }
 
     private void setCurrentSequence(FrameSequence sequence, int index, double time) {
-        if (currentSequence != null && currentSequence != sequence) {
-            currentSequence.stop();
-        }
-
         currentSequence = sequence;
         currentSegment = index;
         updateFrameOnly(time);
@@ -133,9 +162,11 @@ public class Preview extends VBox implements Styleable {
         if (isPlaying.get()) {
             currentSequence.play(time);
             resetPlaybackTiming(time);
-        } else {
-            updateAudioPosition(time);
+            if (isPlaying.get()) {
+                audioQueue.offer(currentSequence.audioData);
+            }
         }
+        updateFrameOnly(time);
     }
 
     private void updateFrameOnly(double time) {
@@ -152,7 +183,25 @@ public class Preview extends VBox implements Styleable {
     private void updateAudioPosition(double time) {
         if (currentSequence != null) {
             double segmentTime = time % SEG_SIZE;
-            currentSequence.seekAudio(segmentTime);
+            AudioFormat format = audioLine.getFormat();
+            int frameSize = format.getFrameSize(); // Bytes per frame (e.g., 4 bytes for 16-bit stereo)
+            float frameRate = format.getFrameRate(); // Frames per second (e.g., 44100)
+
+            int byteOffset = (int) (segmentTime * frameRate * frameSize);
+
+            if (byteOffset % frameSize != 0) {
+                byteOffset -= byteOffset % frameSize;
+            }
+
+            byte[] fullAudioData = currentSequence.getAudioData();
+            if (byteOffset >= fullAudioData.length) {
+                return;
+            }
+
+            byte[] partialAudio = Arrays.copyOfRange(fullAudioData, byteOffset, fullAudioData.length);
+
+            audioQueue.clear();
+            audioQueue.offer(partialAudio);
             lastAudioSeekTime = time;
         }
     }
@@ -201,10 +250,10 @@ public class Preview extends VBox implements Styleable {
 
                 // Load audio using Java Sound API
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-                Clip audioClip = AudioSystem.getClip();
-                audioClip.open(audioStream);
+                byte[] audioData = audioStream.readAllBytes();
+                audioStream.close();
 
-                FrameSequence sequence = new FrameSequence(frames, audioClip, audioStream,
+                FrameSequence sequence = new FrameSequence(frames, audioData, audioStream,
                         owner.framerateProperty().get(), tempDir);
 
                 sequence.setOnEnd(() -> {
@@ -239,14 +288,16 @@ public class Preview extends VBox implements Styleable {
             currentSequence.play(time);
             resetPlaybackTiming(time);
             frameTimer.start();
+            updateAudioPosition(time);
         }
     }
 
     public void pause() {
         if (currentSequence != null && isPlaying.get()) {
             isPlaying.set(false);
-            currentSequence.pause();
             frameTimer.stop();
+            audioQueue.clear(); // Clear the queue to stop any playing sound
+            audioLine.flush();
         }
     }
 
@@ -262,6 +313,15 @@ public class Preview extends VBox implements Styleable {
         loadingSegments.clear();
 
         frameTimer.stop();
+
+        isAudioRunning.set(false);
+        if (audioThread != null) {
+            audioThread.interrupt();
+        }
+        if (audioLine != null) {
+            audioLine.drain();
+            audioLine.close();
+        }
     }
 
     @Override
@@ -271,7 +331,7 @@ public class Preview extends VBox implements Styleable {
 
     private class FrameSequence {
         private final List<Image> frames;
-        private final Clip audioClip;
+        private final byte[] audioData;
         private final AudioInputStream audioStream;
         private final double frameRate;
         private final File tempDir;
@@ -279,10 +339,10 @@ public class Preview extends VBox implements Styleable {
         private final int sampleRate;
         private Runnable onEnd;
 
-        public FrameSequence(List<Image> frames, Clip audioClip, AudioInputStream audioStream,
+        public FrameSequence(List<Image> frames, byte[] audioData, AudioInputStream audioStream,
                              double frameRate, File tempDir) {
             this.frames = frames;
-            this.audioClip = audioClip;
+            this.audioData = audioData;
             this.audioStream = audioStream;
             this.frameRate = frameRate;
             this.tempDir = tempDir;
@@ -309,33 +369,10 @@ public class Preview extends VBox implements Styleable {
             }
 
             view.setImage(getFrame(frameIndex));
-            seekAudio(segmentTime);
-            if (!audioClip.isRunning()) {
-                audioClip.start();
-            }
         }
 
-        public void seekAudio(double segmentTime) {
-            if (audioClip != null) {
-                long framePosition = (long) (segmentTime * sampleRate);
-
-                if (framePosition >= 0 && framePosition < audioClip.getFrameLength()) {
-                    audioClip.setFramePosition((int) framePosition);
-                }
-            }
-        }
-
-        public void pause() {
-            if (audioClip != null && audioClip.isRunning()) {
-                audioClip.stop();
-            }
-        }
-
-        public void stop() {
-            if (audioClip != null) {
-                audioClip.stop();
-                audioClip.setFramePosition(0);
-            }
+        public byte[] getAudioData() {
+            return audioData;
         }
 
         public void setOnEnd(Runnable onEnd) {
@@ -344,10 +381,6 @@ public class Preview extends VBox implements Styleable {
 
         public void dispose() {
             frames.forEach(Image::cancel);
-
-            if (audioClip != null) {
-                audioClip.close();
-            }
 
             if (audioStream != null) {
                 try {
