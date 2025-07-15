@@ -19,10 +19,7 @@ import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -120,7 +117,7 @@ public class Preview extends VBox implements Styleable {
         segments.keySet().forEach(index -> {
             FfmpegCommand imgCom = owner.previewFrames(out, index * SEG_SIZE, SEG_SIZE);
             FfmpegCommand audioCom = owner.previewAudio(out, index * SEG_SIZE, SEG_SIZE);
-            String com = imgCom.setOutput(out).apply(imgCom) + audioCom.setOutput(out).apply(audioCom);
+            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg") + audioCom.setOutput(out).apply(audioCom, "ffmpeg");
             if(segments.get(index) != null && !segments.get(index).getCommand().equals(com)) {
                 toRemove.add(index);
             }
@@ -135,7 +132,7 @@ public class Preview extends VBox implements Styleable {
         if (currentSequence != null) {
             FfmpegCommand imgCom = owner.previewFrames(out, currentSegment * SEG_SIZE, SEG_SIZE);
             FfmpegCommand audioCom = owner.previewAudio(out, currentSegment * SEG_SIZE, SEG_SIZE);
-            String com = imgCom.setOutput(out).apply(imgCom) + audioCom.setOutput(out).apply(audioCom);
+            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg") + audioCom.setOutput(out).apply(audioCom, "ffmpeg");
             if(!currentSequence.getCommand().equals(com)) {
                 currentSequence = null;
                 double at = owner.atProperty().get();
@@ -274,15 +271,15 @@ public class Preview extends VBox implements Styleable {
                 }
 
                 List<Image> frames = new ArrayList<>();
-                for (File imageFile : imageFiles) {
+                Arrays.stream(imageFiles).sorted(Comparator.comparing(File::getName)).forEach(imageFile -> {
                     frames.add(new Image(imageFile.toURI().toString(), true));
-                }
+                });
 
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
                 byte[] audioData = audioStream.readAllBytes();
                 audioStream.close();
 
-                String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom) + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom);
+                String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom, "ffmpeg") + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom, "ffmpeg");
                 FrameSequence sequence = new FrameSequence(com, frames, audioData, audioStream,
                         owner.framerateProperty().get(), tempDir);
 
