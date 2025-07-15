@@ -21,11 +21,9 @@ public class TimeRuler extends Pane implements Styleable {
 
     private final Home owner;
 
-    // Object pools for recycling
     private final ArrayList<TickMark> tickMarkPool = new ArrayList<>();
     private final ArrayList<TimeLabel> timeLabelPool = new ArrayList<>();
 
-    // Currently active (visible) elements
     private final ArrayList<TickMark> activeTickMarks = new ArrayList<>();
     private final ArrayList<TimeLabel> activeTimeLabels = new ArrayList<>();
 
@@ -36,6 +34,8 @@ public class TimeRuler extends Pane implements Styleable {
     private double initDur;
     private double initX;
     private boolean resizeOut = false;
+
+    private boolean updating = false;
 
     public TimeRuler(Home owner) {
         this.owner = owner;
@@ -54,11 +54,12 @@ public class TimeRuler extends Pane implements Styleable {
             DoubleProperty duration = owner.durationProperty();
             pixelsPerSecond = owner.ppsProperty();
 
-            InvalidationListener retick = (e) -> {
-                double begin = scrollX.get() / pixelsPerSecond.get();
-                double visibleDuration = vpw.get() / pixelsPerSecond.get();
-                double end = begin + visibleDuration;
-                updateTicks(pre.get(), begin, end, pixelsPerSecond.get(), scrollX.get(), vpw.get());
+            InvalidationListener retick = (_) -> {
+                if (isOnFxThread()) {
+                    updateTicksSafely(scrollX, vpw);
+                } else {
+                    Platform.runLater(() -> updateTicksSafely(scrollX, vpw));
+                }
             };
 
             duration.addListener(retick);
@@ -82,6 +83,22 @@ public class TimeRuler extends Pane implements Styleable {
         });
 
         applyStyle(owner.getWindow().getStyl());
+    }
+
+    private void updateTicksSafely(ObservableDoubleValue scrollX, ReadOnlyDoubleProperty vpw) {
+        if (updating || pixelsPerSecond == null || pre == null) {
+            return;
+        }
+
+        try {
+            updating = true;
+            double begin = scrollX.get() / pixelsPerSecond.get();
+            double visibleDuration = vpw.get() / pixelsPerSecond.get();
+            double end = begin + visibleDuration;
+            updateTicks(pre.get(), begin, end, pixelsPerSecond.get(), scrollX.get(), vpw.get());
+        } finally {
+            updating = false;
+        }
     }
 
     private void setupClickHandler() {
@@ -126,7 +143,12 @@ public class TimeRuler extends Pane implements Styleable {
     }
 
     private void updateTicks(double pre, double begin, double end, double pixelsPerSecond, double xScroll, double vpw) {
-        returnToPool();
+        if (!isOnFxThread()) {
+            Platform.runLater(() -> updateTicks(pre, begin, end, pixelsPerSecond, xScroll, vpw));
+            return;
+        }
+
+        returnToPoolSafely();
 
         TickInterval interval = calculateTickInterval(pixelsPerSecond);
 
@@ -136,10 +158,14 @@ public class TimeRuler extends Pane implements Styleable {
         for (double time = majorStart; time <= end + interval.major / 2; time += interval.major) {
             if (time >= begin - interval.major) {
                 TickMark tick = getTickMark();
-                tick.updatePosition(pre, time, true, pixelsPerSecond);
+                if (tick != null) {
+                    tick.updatePosition(pre, time, true, pixelsPerSecond);
+                }
 
                 TimeLabel label = getTimeLabel();
-                label.updatePosition(pre, time, pixelsPerSecond, xScroll, vpw, owner.framerateProperty().get());
+                if (label != null) {
+                    label.updatePosition(pre, time, pixelsPerSecond, xScroll, vpw, owner.framerateProperty().get());
+                }
             }
         }
 
@@ -147,7 +173,9 @@ public class TimeRuler extends Pane implements Styleable {
             if (time >= begin - interval.minor) {
                 if (Math.abs(time % interval.major) > 0.001) {
                     TickMark tick = getTickMark();
-                    tick.updatePosition(pre, time, false, pixelsPerSecond);
+                    if (tick != null) {
+                        tick.updatePosition(pre, time, false, pixelsPerSecond);
+                    }
                 }
             }
         }
@@ -160,10 +188,19 @@ public class TimeRuler extends Pane implements Styleable {
         } else {
             tick = tickMarkPool.removeLast();
         }
-        tick.setStroke(owner.getWindow().getStyl().get().getTextNormal());
 
-        activeTickMarks.add(tick);
-        getChildren().addFirst(tick);
+        if (tick != null) {
+            tick.setStroke(owner.getWindow().getStyl().get().getTextNormal());
+            activeTickMarks.add(tick);
+
+            try {
+                getChildren().add(tick);
+            } catch (Exception e) {
+                activeTickMarks.remove(tick);
+                tickMarkPool.add(tick);
+                return null;
+            }
+        }
 
         return tick;
     }
@@ -175,25 +212,46 @@ public class TimeRuler extends Pane implements Styleable {
         } else {
             label = timeLabelPool.removeLast();
         }
-        label.setFill(owner.getWindow().getStyl().get().getTextNormal());
 
-        activeTimeLabels.add(label);
-        getChildren().addFirst(label);
+        if (label != null) {
+            label.setFill(owner.getWindow().getStyl().get().getTextNormal());
+            activeTimeLabels.add(label);
+
+            try {
+                getChildren().add(label);
+            } catch (Exception e) {
+                activeTimeLabels.remove(label);
+                timeLabelPool.add(label);
+                return null;
+            }
+        }
 
         return label;
     }
 
-    private void returnToPool() {
-        getChildren().removeAll(activeTickMarks);
-        tickMarkPool.addAll(activeTickMarks);
-        activeTickMarks.clear();
+    private void returnToPoolSafely() {
+        try {
+            getChildren().clear();
 
-        getChildren().removeAll(activeTimeLabels);
-        timeLabelPool.addAll(activeTimeLabels);
-        activeTimeLabels.clear();
+            tickMarkPool.addAll(activeTickMarks);
+            activeTickMarks.clear();
+
+            timeLabelPool.addAll(activeTimeLabels);
+            activeTimeLabels.clear();
+
+        } catch (Exception e) {
+            getChildren().clear();
+            activeTickMarks.clear();
+            activeTimeLabels.clear();
+
+            initializePools();
+        }
     }
 
     private void initializePools() {
+        tickMarkPool.clear();
+        timeLabelPool.clear();
+
         for (int i = 0; i < 50; i++) {
             tickMarkPool.add(new TickMark());
         }
@@ -228,14 +286,30 @@ public class TimeRuler extends Pane implements Styleable {
 
     @Override
     public void applyStyle(Style style) {
-        for (TickMark activeTickMark : activeTickMarks) {
-            activeTickMark.setStroke(style.getTextNormal());
+        if (!isOnFxThread()) {
+            Platform.runLater(() -> applyStyle(style));
+            return;
         }
 
-        for (TimeLabel activeTimeLabel : activeTimeLabels) {
-            activeTimeLabel.setFill(style.getTextNormal());
-        }
+        try {
+            for (TickMark activeTickMark : activeTickMarks) {
+                if (activeTickMark != null) {
+                    activeTickMark.setStroke(style.getTextNormal());
+                }
+            }
 
-        setBackground(Backgrounds.make(style.getBackgroundModifierHover()));
+            for (TimeLabel activeTimeLabel : activeTimeLabels) {
+                if (activeTimeLabel != null) {
+                    activeTimeLabel.setFill(style.getTextNormal());
+                }
+            }
+
+            setBackground(Backgrounds.make(style.getBackgroundModifierHover()));
+        } catch (Exception _) {
+        }
+    }
+
+    private boolean isOnFxThread() {
+        return javafx.application.Platform.isFxApplicationThread();
     }
 }

@@ -1,5 +1,6 @@
 package org.luke.decut.app.timeline.viewport.content;
 
+import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.layout.Priority;
@@ -27,8 +28,9 @@ public class TrackContentList extends VerticalScrollable implements Styleable {
         StackPane.setAlignment(root, Pos.TOP_CENTER);
 
         Platform.runLater(() -> {
-            owner.getTracks().getTracks().addListener((ListChangeListener<? super Track>) c -> {
-                root.getChildren().setAll(c.getList().stream().map(Track::getContent).toList());
+            owner.getTracks().getTracks().addListener((InvalidationListener) _ -> {
+                root.getChildren().clear();
+                root.getChildren().addAll(owner.getTracks().getTracks().stream().map(Track::getContent).toList());
             });
             prefHeightProperty().bind(owner.getTracks().getTrackList().heightProperty());
         });

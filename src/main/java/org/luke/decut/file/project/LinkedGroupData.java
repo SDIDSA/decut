@@ -1,14 +1,10 @@
 package org.luke.decut.file.project;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LinkedGroupData {
-    public static final String GROUP_ID = "groupId";
-    public static final String CLIP_IDS = "clipIds";
-
     private Integer groupId;
     private List<Integer> clipIds;
 

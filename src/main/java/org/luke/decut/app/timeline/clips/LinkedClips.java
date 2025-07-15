@@ -1,16 +1,14 @@
 package org.luke.decut.app.timeline.clips;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LinkedClips {
-    private final ObservableList<TimelineClip> clips;
+    private final ArrayList<TimelineClip> clips;
     private boolean updating = false; // Prevent recursive updates
 
     public LinkedClips() {
-        this.clips = FXCollections.observableArrayList();
+        this.clips = new ArrayList<>();
     }
 
     public void addClip(TimelineClip clip) {
@@ -23,7 +21,7 @@ public class LinkedClips {
         clip.setLinkedGroup(null);
     }
 
-    public ObservableList<TimelineClip> getClips() {
+    public ArrayList<TimelineClip> getClips() {
         return clips;
     }
 

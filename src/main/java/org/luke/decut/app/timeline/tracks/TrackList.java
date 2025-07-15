@@ -9,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.luke.decut.app.home.Home;
 import org.luke.gui.controls.scroll.VerticalScrollable;
+import org.luke.gui.exception.MyObservableList;
 import org.luke.gui.style.Style;
 import org.luke.gui.style.Styleable;
 
@@ -28,7 +29,7 @@ public class TrackList extends VerticalScrollable implements Styleable {
 
         StackPane.setAlignment(root, Pos.TOP_CENTER);
 
-        tracks = FXCollections.observableArrayList();
+        tracks = MyObservableList.createList();
 
         tracks.addListener((ListChangeListener<? super Track>) c -> {
             root.getChildren().setAll(c.getList());

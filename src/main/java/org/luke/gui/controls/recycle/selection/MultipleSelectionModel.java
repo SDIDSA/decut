@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.luke.gui.controls.recycle.VirtualFlow;
+import org.luke.gui.exception.MyObservableList;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -32,7 +33,7 @@ public class MultipleSelectionModel<T> implements SelectionModel<T> {
         selectedItem = new ReadOnlyObjectWrapper<>(this, "selectedItem");
         empty = new ReadOnlyBooleanWrapper(this, "empty", true);
 
-        indices = FXCollections.observableArrayList();
+        indices = MyObservableList.createList();
 
         selectedItem.bind(Bindings.createObjectBinding(() -> {
             int index = selectedIndex.get();
@@ -41,7 +42,7 @@ public class MultipleSelectionModel<T> implements SelectionModel<T> {
                     : null;
         }, selectedIndex, flow.getItems()));
 
-        items = FXCollections.observableArrayList();
+        items = MyObservableList.createList();
 
         indices.addListener((ListChangeListener<? super Integer>) _ ->
                 items.setAll(

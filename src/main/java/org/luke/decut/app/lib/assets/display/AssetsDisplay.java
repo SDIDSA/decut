@@ -18,6 +18,7 @@ import org.luke.gui.controls.recycle.grid.GridView;
 import org.luke.gui.controls.recycle.selection.SelectionMode;
 import org.luke.gui.controls.recycle.table.ColumnRenderer;
 import org.luke.gui.controls.recycle.table.TableView;
+import org.luke.gui.exception.MyObservableList;
 import org.luke.gui.style.Style;
 import org.luke.gui.threading.Platform;
 
@@ -83,7 +84,7 @@ public class AssetsDisplay extends StackPane {
 
         getChildren().add(emptyLib);
 
-        data = FXCollections.observableArrayList();
+        data = MyObservableList.createList();
         filteredData = new FilteredList<>(data, ad -> currentFilter.isPresent(ad.getType()));
 
         filteredData.addListener((InvalidationListener) _ -> {

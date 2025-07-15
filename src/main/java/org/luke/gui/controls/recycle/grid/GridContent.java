@@ -12,6 +12,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.geometry.Pos;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import org.luke.gui.exception.MyObservableList;
 
 import java.util.*;
 import java.util.function.Function;
@@ -39,7 +40,7 @@ public class GridContent<T> extends Pane {
 
     public GridContent(GridView<T> gridView) {
         this.gridView = gridView;
-        data = FXCollections.observableArrayList();
+        data = MyObservableList.createList();
         sortedData = new SortedList<>(data);
         cellFactory = new SimpleObjectProperty<>();
         cellWidth = new SimpleDoubleProperty(100);

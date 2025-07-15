@@ -136,8 +136,6 @@ public class Preview extends VBox implements Styleable {
             FfmpegCommand imgCom = owner.previewFrames(out, currentSegment * SEG_SIZE, SEG_SIZE);
             FfmpegCommand audioCom = owner.previewAudio(out, currentSegment * SEG_SIZE, SEG_SIZE);
             String com = imgCom.setOutput(out).apply(imgCom) + audioCom.setOutput(out).apply(audioCom);
-            System.out.println(com);
-            System.out.println(currentSequence.command);
             if(!currentSequence.getCommand().equals(com)) {
                 currentSequence = null;
                 double at = owner.atProperty().get();

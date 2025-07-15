@@ -17,6 +17,7 @@ import org.luke.decut.app.timeline.clips.VideoClip;
 import org.luke.decut.app.timeline.tracks.Track;
 import org.luke.gui.controls.Font;
 import org.luke.gui.controls.text.unkeyed.Label;
+import org.luke.gui.exception.MyObservableList;
 import org.luke.gui.factory.Backgrounds;
 import org.luke.gui.style.Style;
 import org.luke.gui.style.Styleable;
@@ -39,7 +40,7 @@ public class TrackContent extends Pane implements Styleable {
     public TrackContent(Home owner, Track track) {
         this.owner = owner;
         this.track = track;
-        clips = FXCollections.observableArrayList();
+        clips = MyObservableList.createList();
         sortedClips = new SortedList<>(clips, Comparator.comparing(TimelineClip::getStartTime));
 
         setMinSize(USE_PREF_SIZE, USE_PREF_SIZE);
@@ -132,5 +133,14 @@ public class TrackContent extends Pane implements Styleable {
     public void applyStyle(Style style) {
         label.setFill(style.getTextNormal());
         setBackground(Backgrounds.make(style.getBackgroundModifierHover(), 5, new Insets(3, 0, 3, 0)));
+    }
+
+    @Override
+    protected void updateBounds() {
+        try {
+            super.updateBounds();
+        } catch (Exception x) {
+            System.out.println("suspect : TrackContent");
+        }
     }
 }

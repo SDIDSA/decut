@@ -11,8 +11,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 
 public class AppPreRoot extends StackPane {
-	public static final double DEFAULT_PADDING = 15;
-	
+
 	private final AppRoot root;
 	
 	public AppPreRoot(Window window) {

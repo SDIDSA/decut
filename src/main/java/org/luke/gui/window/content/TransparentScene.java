@@ -9,4 +9,6 @@ public class TransparentScene extends javafx.scene.Scene {
 
 		setFill(Color.TRANSPARENT);
 	}
+
+
 }

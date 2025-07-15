@@ -12,6 +12,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.geometry.Pos;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import org.luke.gui.exception.MyObservableList;
 import org.luke.gui.style.StyledColor;
 
 import java.util.*;
@@ -32,7 +33,7 @@ public class ListContent<T> extends Pane {
 
     public ListContent(ListView<T> listView) {
         this.listView = listView;
-        data = FXCollections.observableArrayList();
+        data = MyObservableList.createList();
         sortedData = new SortedList<>(data);
         rowFactory = new SimpleObjectProperty<>();
         rowHeight = new SimpleDoubleProperty(30);

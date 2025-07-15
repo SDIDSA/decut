@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Platform {
-    public static int threadIndex = 0;
+    private static int threadIndex = 0;
     private static final Function<String, ThreadFactory> threadMaker =
             (name) ->
                     (runnable) -> new Thread(runnable, name + "_" + threadIndex++);
@@ -21,7 +21,7 @@ public class Platform {
     private static final Function<String, ExecutorService> poolMaker =
             (name) -> Executors.newCachedThreadPool(threadMaker.apply(name));
 
-    public static final ExecutorService back = poolMaker.apply("back_thread");
+    private static final ExecutorService back = poolMaker.apply("back_thread");
     private static final ExecutorService wait = poolMaker.apply("wait_thread");
 
     public static void runLater(Runnable r) {
