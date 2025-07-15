@@ -13,9 +13,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Platform {
+    public static int threadIndex = 0;
     private static final Function<String, ThreadFactory> threadMaker =
             (name) ->
-                    (runnable) -> new Thread(runnable, name);
+                    (runnable) -> new Thread(runnable, name + "_" + threadIndex++);
 
     private static final Function<String, ExecutorService> poolMaker =
             (name) -> Executors.newCachedThreadPool(threadMaker.apply(name));

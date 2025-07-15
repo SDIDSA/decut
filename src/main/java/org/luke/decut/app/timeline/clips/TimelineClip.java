@@ -217,8 +217,6 @@ public class TimelineClip extends Pane implements Styleable {
             TimelineClip clip = clips.get(i);
             TimelineClip next = clips.get(i + 1);
             if (owner.timeToFrame(clip.getEndTime()) > owner.timeToFrame(next.getStartTime())) {
-                System.out.println("collision happening " + clip + " : " + next);
-                System.out.println(clip.getEndTime() + " : " + next.getStartTime());
                 next.setStartTime(clip.getEndTime());
                 return true;
             }
@@ -250,7 +248,6 @@ public class TimelineClip extends Pane implements Styleable {
                 res.put(clip, clip.getStartTime());
             });
         });
-        System.out.println(res.size());
         return res;
     }
 
