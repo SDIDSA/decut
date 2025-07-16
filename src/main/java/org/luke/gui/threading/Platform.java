@@ -177,7 +177,7 @@ public class Platform {
             try {
                 action.run();
             } catch (Exception x) {
-                ErrorHandler.handle(x, "(doing something) in thread " + Thread.currentThread().getName());
+                ErrorHandler.handle(x, "(do something) in thread " + Thread.currentThread().getName());
             }
         };
     }
@@ -187,7 +187,7 @@ public class Platform {
             try {
                 return action.get();
             } catch (Exception x) {
-                ErrorHandler.handle(x, "(doing something) in thread " + Thread.currentThread().getName());
+                ErrorHandler.handle(x, "(do something) in thread " + Thread.currentThread().getName());
                 return null;
             }
         };
@@ -198,7 +198,7 @@ public class Platform {
             try {
                 return action.apply(in);
             } catch (Exception x) {
-                ErrorHandler.handle(x, "(doing something) in thread " + Thread.currentThread().getName());
+                ErrorHandler.handle(x, "(do something) in thread " + Thread.currentThread().getName());
                 return null;
             }
         };

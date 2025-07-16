@@ -4,6 +4,7 @@ import javafx.geometry.Dimension2D;
 import javafx.scene.image.Image;
 import org.luke.decut.app.lib.assets.filter.AssetType;
 import org.luke.decut.ffmpeg.FfmpegCommand;
+import org.luke.decut.ffmpeg.LineHandler;
 import org.luke.decut.ffmpeg.bitrate.AudioBitrate;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.filter_complex.audio.APad;
@@ -13,6 +14,7 @@ import org.luke.decut.ffmpeg.options.Skip;
 import org.luke.decut.ffmpeg.options.VFrames;
 import org.luke.gui.controls.image.ImageProxy;
 import org.luke.gui.exception.ErrorHandler;
+import org.luke.gui.threading.Platform;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,17 +33,8 @@ public class VideoAssetData extends AssetData {
         fetch();
     }
 
-    public static VideoAssetData byName(File file) {
-        for(Map.Entry<File, VideoAssetData> entry : cache.entrySet()) {
-            if(file.getName().equals(entry.getKey().getName())) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
     public static VideoAssetData getData(File file) {
-        VideoAssetData found = file.exists() ? cache.get(file) : byName(file);
+        VideoAssetData found = cache.get(file);
         if (found == null) {
             found = new VideoAssetData(file);
             cache.put(file, found);
@@ -69,6 +62,8 @@ public class VideoAssetData extends AssetData {
     public void fetch(boolean parent) {
         super.fetch();
         if(parent) {
+            long command = System.currentTimeMillis();
+            System.out.println(command + " started");
             FfmpegCommand makeThumbs = new FfmpegCommand()
                     .addInput(getFile())
                     .addOption(new Seek("00:00:01.000"))
@@ -82,14 +77,12 @@ public class VideoAssetData extends AssetData {
                                     Image im = new Image(fis);
                                     resolution = new Dimension2D(im.getWidth(), im.getHeight());
                                     thumb = ImageProxy.resize(ImageUtils.cropCenter(im), 128);
-                                    //Files.delete(file.toPath());
                                 } catch (IOException x) {
                                     ErrorHandler.handle(x, "generate video thumbnail");
                                 }
                             },
                             ".jpg")
                     .execute();
-
             makeThumbs.waitFor();
 
             String name = getFile().getName();
@@ -113,6 +106,7 @@ public class VideoAssetData extends AssetData {
                     .execute();
             makeVid.waitFor();
             makeAud.waitFor();
+            System.out.println(duration);
         }
     }
 

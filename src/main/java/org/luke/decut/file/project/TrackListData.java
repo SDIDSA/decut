@@ -7,9 +7,12 @@ import org.luke.decut.app.lib.assets.data.VideoAssetData;
 import org.luke.decut.app.lib.assets.filter.AssetType;
 import org.luke.decut.app.timeline.clips.TimelineClip;
 import org.luke.decut.app.timeline.tracks.Track;
+import org.luke.gui.threading.Platform;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public class TrackListData extends ArrayList<TrackData> implements ProjectPart {
@@ -50,12 +53,23 @@ public class TrackListData extends ArrayList<TrackData> implements ProjectPart {
         this.forEach((i, t) -> {
             Track track = owner.getTracks().getTrackList().addTrackAt(new Track(owner, t.getType()), i);
             for (ClipData clipData : t) {
-                AssetData data = AssetData.getData(clipData.getSource());
+                File source = getFile(owner, clipData);
+                AssetData data = AssetData.getData(source);
+                System.out.println(data instanceof VideoAssetData);
                 if(data instanceof VideoAssetData parent) {
                     if(clipData.getType() == AssetType.VIDEO) {
+                        System.out.println("is video");
                         data = parent.getVideo();
                     } else if(clipData.getType() == AssetType.AUDIO) {
+                        System.out.println("is audio");
                         data = parent.getAudio();
+                        if(data == null) {
+                            Platform.runAfter(() -> {
+                                System.out.println(parent.getAudio());
+                            }, 2000);
+                        }
+                    } else {
+                        System.out.println("is unknown");
                     }
                 }
                 TimelineClip clip = track.getContent().createClip(data, 0);
@@ -65,5 +79,19 @@ public class TrackListData extends ArrayList<TrackData> implements ProjectPart {
                 track.getContent().addClip(clip);
             }
         });
+    }
+
+    private static File getFile(Home owner, ClipData clipData) {
+        File source = clipData.getSource();
+        if(!source.exists()) {
+            int lastIndexFor = source.getAbsolutePath().lastIndexOf("/");
+            int lastIndexBack = source.getAbsolutePath().lastIndexOf("\\");
+            String name = source.getAbsolutePath().substring(Math.max(lastIndexBack, lastIndexFor) + 1);
+            File rep = new File(owner.getOpenProject().getParent(), name);
+            if(rep.exists()) {
+                source = rep;
+            }
+        }
+        return source;
     }
 }

@@ -39,9 +39,10 @@ public class DecutProject implements ProjectPart {
 
     @Override
     public void load(Home owner) {
-        assets.load(owner);
-        timeline.load(owner);
-        properties.load(owner);
+        assets.load(owner, () -> {
+            timeline.load(owner);
+            properties.load(owner);
+        });
     }
 
     public JSONObject serialize() {

@@ -24,8 +24,10 @@ public class LocalStore {
 
 
 	private static final String DEFAULT_FFMPEG = "default_ffmpeg";
+	private static final String DEFAULT_FFPROBE = "default_ffprobe";
 
 	private static final String FFMPEG_INSTS = "ffmpeg_added";
+	private static final String FFPROBE_INSTS = "ffprobe_added";
 
 	private static final File json;
 
@@ -95,6 +97,14 @@ public class LocalStore {
 		set(DEFAULT_FFMPEG, defaultFfmpeg);
 	}
 
+	public static String getDefaultFfprobe() {
+		return get(DEFAULT_FFPROBE);
+	}
+
+	public static void setDefaultFfprobe(String defaultFfprobe) {
+		set(DEFAULT_FFPROBE, defaultFfprobe);
+	}
+
 	public static ArrayList<String> ffmpegAdded() {
 		String s = get(FFMPEG_INSTS);
 		if (s == null) {
@@ -104,11 +114,27 @@ public class LocalStore {
 		return deserializeList(s);
 	}
 
+	public static ArrayList<String> ffprobeAdded() {
+		String s = get(FFPROBE_INSTS);
+		if (s == null) {
+			s = "[]";
+			set(FFPROBE_INSTS, s);
+		}
+		return deserializeList(s);
+	}
+
 	public static void addFfmpegInst(String path) {
 		ArrayList<String> insts = ffmpegAdded();
 		if(insts.contains(path)) return;
 		insts.add(path);
 		set(FFMPEG_INSTS, serializeList(insts));
+	}
+
+	public static void addFfprobeInst(String path) {
+		ArrayList<String> insts = ffprobeAdded();
+		if(insts.contains(path)) return;
+		insts.add(path);
+		set(FFPROBE_INSTS, serializeList(insts));
 	}
 
 	public static void removeFfmpegInst(String path) {
@@ -122,6 +148,19 @@ public class LocalStore {
 		});
 
 		set(FFMPEG_INSTS, serializeList(insts));
+	}
+
+	public static void removeFfprobeInst(String path) {
+		ArrayList<String> insts = ffprobeAdded();
+
+		String p1 = new File(path).getAbsolutePath();
+
+		insts.removeIf(op -> {
+			String p2 = new File(op).getAbsolutePath();
+			return p2.contains(p1) || p1.contains(p2);
+		});
+
+		set(FFPROBE_INSTS, serializeList(insts));
 	}
 	
 	// Utility methods

@@ -4,13 +4,13 @@ import org.json.JSONObject;
 import org.luke.decut.cmd.Command;
 import org.luke.decut.crossplatform.Os;
 import org.luke.decut.file.FileDealer;
-import org.luke.gui.exception.ErrorHandler;
-import org.luke.gui.file.DirUtils;
-import org.luke.gui.window.Window;
 import org.luke.decut.local.LocalStore;
 import org.luke.decut.local.ui.DownloadJob;
 import org.luke.decut.local.ui.DownloadState;
 import org.luke.decut.local.ui.Installed;
+import org.luke.gui.exception.ErrorHandler;
+import org.luke.gui.file.DirUtils;
+import org.luke.gui.window.Window;
 
 import java.io.File;
 import java.util.*;
@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FfmpegManager {
+public class FfprobeManager {
 
 	private static final HashMap<String, LocalInstall> versionCache = new HashMap<>();
 
@@ -34,10 +34,10 @@ public class FfmpegManager {
 	private static final HashMap<String, DownloadJob> downloadJobs = new HashMap<>();
 
 	static {
-		root = Os.fromSystem().getDecutPath("ffmpeg");
+		root = Os.fromSystem().getDecutPath("ffprobe");
 
 		installable = new HashMap<>();
-		JSONObject obj = new JSONObject(FileDealer.read("/ffmpeg.json")).getJSONObject(Os.fromSystem().getName());
+		JSONObject obj = new JSONObject(FileDealer.read("/ffprobe.json")).getJSONObject(Os.fromSystem().getName());
 		obj.keySet().forEach(key -> installable.put(key, obj.getString(key)));
 		if (!root.exists() || !root.isDirectory())
 			root.mkdirs();
@@ -61,7 +61,7 @@ public class FfmpegManager {
 
 		if (found == null) {
 			found = new Installed(win, ver.getVersion(), ver.getRoot(), onChange);
-			found.setOnRemove(() -> LocalStore.removeFfmpegInst(ver.getRoot().getAbsolutePath()));
+			found.setOnRemove(() -> LocalStore.removeFfprobeInst(ver.getRoot().getAbsolutePath()));
 			localCache.put(ver.getRoot(), found);
 		}
 
@@ -100,7 +100,7 @@ public class FfmpegManager {
 
 	public static boolean isValid(String version) {
 		List<String> managedPaths = managedInstalls().stream().map(File::getAbsolutePath).toList();
-		return (LocalStore.ffmpegAdded().contains(version) || managedPaths.contains(version)) && versionOf(version) != null && new File(version).exists();
+		return (LocalStore.ffprobeAdded().contains(version) || managedPaths.contains(version)) && versionOf(version) != null && new File(version).exists();
 	}
 
 	public static List<DownloadJob> downloadJobs() {
@@ -136,7 +136,7 @@ public class FfmpegManager {
 	}
 
 	public static List<LocalInstall> localInstalls() {
-		List<String> paths = LocalStore.ffmpegAdded();
+		List<String> paths = LocalStore.ffprobeAdded();
 
 		ArrayList<LocalInstall> res = new ArrayList<>();
 
@@ -158,7 +158,7 @@ public class FfmpegManager {
 	public static void addLocal(String absolutePath) {
 		LocalInstall inst = versionFromDir(new File(absolutePath));
 		if (inst != null) {
-			LocalStore.addFfmpegInst(inst.getRoot().getAbsolutePath());
+			LocalStore.addFfprobeInst(inst.getRoot().getAbsolutePath());
 		}
 	}
 
@@ -176,16 +176,16 @@ public class FfmpegManager {
 				if (version != null) {
 					return version;
 				}
-			} else if (isFFmpegBinary(sf)) {
+			} else if (isFfprobeBinary(sf)) {
 				if(!Os.fromSystem().isWindows() && !sf.canExecute()) {
                     try {
                         new Command("chmod a+x \"" + sf.getAbsolutePath() + "\"")
                                 .execute(file).waitFor();
                     } catch (InterruptedException e) {
-                        ErrorHandler.handle(e, "enabling the execution of the ffmpeg binary");
+                        ErrorHandler.handle(e, "enabling the execution of the ffprobe binary");
                     }
                 }
-				String version = getFFmpegVersion("\""+sf.getAbsolutePath()+"\"");
+				String version = getFfprobeVersion("\""+sf.getAbsolutePath()+"\"");
 				if (version != null) {
 					return new LocalInstall(sf.getParentFile(), sf, version);
 				}
@@ -194,21 +194,21 @@ public class FfmpegManager {
 		return null;
 	}
 
-	private static boolean isFFmpegBinary(File file) {
+	private static boolean isFfprobeBinary(File file) {
 		String name = file.getName().toLowerCase();
 		Os currentOs = Os.fromSystem();
 
 		if (currentOs.isWindows()) {
-			return name.equals("ffmpeg.exe");
+			return name.equals("ffprobe.exe");
 		} else {
-			return name.equals("ffmpeg") && file.isFile();
+			return name.equals("ffprobe") && file.isFile();
 		}
 	}
 
-	public static String getFFmpegVersion(String ffmpegBinary) {
+	public static String getFfprobeVersion(String ffprobeBinary) {
 		AtomicReference<String> versionRef = new AtomicReference<>();
 		Consumer<String> parser = line -> {
-			if (line.startsWith("ffmpeg version")) {
+			if (line.startsWith("ffprobe version")) {
 				String version = extractVersionFromLine(line);
 				if (version != null) {
 					versionRef.set(version);
@@ -216,7 +216,7 @@ public class FfmpegManager {
 			}
 		};
         try {
-            new Command(ffmpegBinary, "-version")
+            new Command(ffprobeBinary, "-version")
                     .addErrorHandler(parser)
                     .addInputHandler(parser)
                     .execute(new File("/"))
@@ -225,7 +225,7 @@ public class FfmpegManager {
 				return versionRef.get();
 			}
         } catch (InterruptedException e) {
-			ErrorHandler.handle(e, "parse ffmpeg version from binary");
+			ErrorHandler.handle(e, "parse ffprobe version from binary");
         }
 		return null;
     }

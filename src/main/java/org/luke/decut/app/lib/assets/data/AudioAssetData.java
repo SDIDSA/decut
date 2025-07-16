@@ -27,17 +27,8 @@ public class AudioAssetData extends AssetData {
         fetch();
     }
 
-    public static AudioAssetData byName(File file) {
-        for(Map.Entry<File, AudioAssetData> entry : cache.entrySet()) {
-            if(file.getName().equals(entry.getKey().getName())) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
     public static AudioAssetData getData(File file) {
-        AudioAssetData found = file.exists() ? cache.get(file) : byName(file);
+        AudioAssetData found = cache.get(file);
         if (found == null) {
             found = new AudioAssetData(file);
             cache.put(file, found);

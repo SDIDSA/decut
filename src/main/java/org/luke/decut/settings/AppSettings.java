@@ -1,6 +1,7 @@
 package org.luke.decut.settings;
 
 import org.luke.decut.settings.content.ffmpeg.FfmpegSettings;
+import org.luke.decut.settings.content.ffprobe.FfprobeSettings;
 import org.luke.gui.window.Window;
 import org.luke.decut.settings.abs.Settings;
 import org.luke.decut.settings.abs.left.Section;
@@ -16,6 +17,7 @@ public class AppSettings extends Settings {
 		Section appSettings = new Section(this, "decut_settings", true);
 		appSettings.addItem(new SectionItem(this, "display", DisplaySettings.class));
 		appSettings.addItem(new SectionItem(this, "ffmpeg_versions", FfmpegSettings.class));
+		appSettings.addItem(new SectionItem(this, "ffprobe_versions", FfprobeSettings.class));
 
 		sideBar.addSection(appSettings);
 		sideBar.separate(win);

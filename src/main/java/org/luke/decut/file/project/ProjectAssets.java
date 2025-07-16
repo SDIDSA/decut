@@ -32,12 +32,14 @@ public class ProjectAssets extends ArrayList<File> implements ProjectPart {
         }
     }
 
-    @Override
-    public void load(Home owner) {
+    public void load(Home owner, Runnable post) {
         HashMap<File, File> replace = new HashMap<>();
         forEach(file -> {
             if(!file.exists()) {
-                File rep = new File(owner.getOpenProject().getParent(), file.getName());
+                int lastIndexFor = file.getAbsolutePath().lastIndexOf("/");
+                int lastIndexBack = file.getAbsolutePath().lastIndexOf("\\");
+                String name = file.getAbsolutePath().substring(Math.max(lastIndexBack, lastIndexFor) + 1);
+                File rep = new File(owner.getOpenProject().getParent(), name);
                 if(rep.exists()) {
                     replace.put(file, rep);
                 }
@@ -47,6 +49,11 @@ public class ProjectAssets extends ArrayList<File> implements ProjectPart {
             remove(key);
             add(value);
         });
-        LibraryContent.getInstance(owner, Assets.class).getGrid().importFiles(this);
+        LibraryContent.getInstance(owner, Assets.class).getGrid().importFiles(this, post);
+    }
+
+    @Override
+    public void load(Home owner) {
+        load(owner, null);
     }
 }

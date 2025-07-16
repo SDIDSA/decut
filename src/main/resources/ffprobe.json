@@ -1,0 +1,93 @@
+{
+  "windows-64": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-win-64.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-win-64.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-win-64.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-win-64.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-win-64.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-win-64.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-win-64.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-win-64.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-win-64.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-win-64.zip"
+  },
+  "windows-32": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-win-32.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-win-32.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-win-32.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-win-32.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-win-32.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-win-32.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-win-32.zip"
+  },
+  "linux-64": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-linux-64.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-linux-64.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-linux-64.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-linux-64.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-linux-64.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-linux-64.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-linux-64.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-64.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-linux-64.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-64.zip"
+  },
+  "linux-32": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-linux-32.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-linux-32.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-linux-32.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-linux-32.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-linux-32.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-linux-32.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-linux-32.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-32.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-linux-32.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-32.zip"
+  },
+  "linux-arm64": {
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-linux-arm-64.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-linux-arm-64.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-linux-arm-64.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-linux-arm-64.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-linux-arm-64.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-arm-64.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-linux-arm-64.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-arm-64.zip"
+  },
+  "linux-armel": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.1.4-linux-armel.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-linux-armel.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-linux-armel-32.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-linux-armel-32.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-linux-armel-32.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-linux-armel-32.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-linux-armel-32.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-armel-32.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-linux-armel-32.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-armel-32.zip"
+  },
+  "linux-armhf": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-linux-armhf.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-linux-armhf.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-linux-armhf-32.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-linux-armhf-32.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1-linux-armhf-32.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-linux-armhf-32.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-linux-armhf-32.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-armhf-32.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-linux-armhf-32.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-armhf-32.zip"
+  },
+  "osx-64": {
+    "3.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.2/ffprobe-3.2-osx-64.zip",
+    "3.3": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.3/ffprobe-3.3.4-osx-64.zip",
+    "3.4": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v3.4/ffprobe-3.4-osx-64.zip",
+    "4.0": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.0/ffprobe-4.0.1-osx-64.zip",
+    "4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.1/ffprobe-4.1.7-osx-64.zip",
+    "4.2": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2/ffprobe-4.2-osx-64.zip",
+    "4.2.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.2.1/ffprobe-4.2.1-osx-64.zip",
+    "4.4.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-osx-64.zip",
+    "5.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v5.1/ffprobe-5.1-macos-64.zip",
+    "6.1": "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-macos-64.zip"
+  }
+}

@@ -190,10 +190,9 @@ public class Preview extends VBox implements Styleable {
 
         if (isPlaying.get()) {
             audioQueue.clear();
-            audioLine.flush();
             currentSequence.play(time);
             resetPlaybackTiming(time);
-            updateAudioPosition(time); // Offer audio from the exact time
+            updateAudioPosition(time);
         }
     }
 
@@ -212,7 +211,7 @@ public class Preview extends VBox implements Styleable {
         if (currentSequence != null) {
             double segmentTime = time - (currentSegment * SEG_SIZE);
             if(segmentTime < AUDIO_POS_THRESHOLD) {
-                audioQueue.offer(currentSequence.getAudioData());
+                audioQueue.offer(currentSequence.audioData);
             } else {
                 AudioFormat format = audioLine.getFormat();
                 int frameSize = format.getFrameSize();
