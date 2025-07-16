@@ -49,6 +49,10 @@ public class FfprobeCommand {
         return this;
     }
 
+    public int getExitCode() {
+        return running.exitValue();
+    }
+
     public FfprobeCommand waitFor() {
         if (running != null && running.isAlive()) {
             try {

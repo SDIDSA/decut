@@ -69,9 +69,11 @@ public class AudioClip extends TimelineClip {
                     if(command == lastCommand) {
                         this.visibleStartTime = audioStartTime;
                         this.visibleEndTime = audioEndTime;
-                        thumb.setPrefWidth(displayWidth);
-                        thumb.setLayoutX(displayX);
-                        thumb.setImage(img);
+                        Platform.runLater(() -> {
+                            thumb.setPrefWidth(displayWidth);
+                            thumb.setLayoutX(displayX);
+                            thumb.setImage(img);
+                        });
                     }
                 }
             });
@@ -86,8 +88,10 @@ public class AudioClip extends TimelineClip {
                 double timeOffsetStart = visibleStartTime - getInPoint();
                 double displayX = timeOffsetStart * pps;
 
-                thumb.setPrefWidth(displayWidth);
-                thumb.setLayoutX(displayX);
+                Platform.runLater(() -> {
+                    thumb.setPrefWidth(displayWidth);
+                    thumb.setLayoutX(displayX);
+                });
             }
 
             waveformUpdateTimeline.stop();

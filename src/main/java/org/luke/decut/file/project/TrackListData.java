@@ -55,21 +55,11 @@ public class TrackListData extends ArrayList<TrackData> implements ProjectPart {
             for (ClipData clipData : t) {
                 File source = getFile(owner, clipData);
                 AssetData data = AssetData.getData(source);
-                System.out.println(data instanceof VideoAssetData);
                 if(data instanceof VideoAssetData parent) {
                     if(clipData.getType() == AssetType.VIDEO) {
-                        System.out.println("is video");
                         data = parent.getVideo();
                     } else if(clipData.getType() == AssetType.AUDIO) {
-                        System.out.println("is audio");
                         data = parent.getAudio();
-                        if(data == null) {
-                            Platform.runAfter(() -> {
-                                System.out.println(parent.getAudio());
-                            }, 2000);
-                        }
-                    } else {
-                        System.out.println("is unknown");
                     }
                 }
                 TimelineClip clip = track.getContent().createClip(data, 0);

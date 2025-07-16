@@ -75,7 +75,6 @@ public class VideoAssetData extends AssetData {
                     .addArgument("default=noprint_wrappers=1:nokey=1")
                     .setInput(getFile())
                     .execute();
-
             FfmpegCommand makeThumbs = new FfmpegCommand()
                     .addInput(getFile())
                     .addOption(new Seek("00:00:01.000"))
@@ -94,7 +93,10 @@ public class VideoAssetData extends AssetData {
 
             makeThumbs.waitFor();
             durCom.waitFor();
-
+            if(durCom.getExitCode() != 0) {
+                fetch(true);
+                return;
+            }
             String name = getFile().getName();
             String ext = name.substring(name.lastIndexOf("."));
             FfmpegCommand makeAud = new FfmpegCommand()

@@ -8,6 +8,7 @@ import org.luke.decut.ffmpeg.filter_complex.audio.AFormat;
 import org.luke.decut.ffmpeg.filter_complex.audio.ATrimC;
 import org.luke.decut.ffmpeg.filter_complex.audio.Compand;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
+import org.luke.decut.ffprobe.FfprobeCommand;
 import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.threading.Platform;
 
@@ -47,8 +48,26 @@ public class AudioAssetData extends AssetData {
 
     public void fetch(boolean parent) {
         super.fetch();
-        if (parent)
+        if (parent) {
+            FfprobeCommand durCom = new FfprobeCommand()
+                    .onOutput(str -> {
+                        duration = (long) (Double.parseDouble(str) * 1000);
+                    })
+                    .addArgument("-v")
+                    .addArgument("error")
+                    .addArgument("-show_entries")
+                    .addArgument("format=duration")
+                    .addArgument("-of")
+                    .addArgument("default=noprint_wrappers=1:nokey=1")
+                    .setInput(getFile())
+                    .execute()
+                    .waitFor();
+            if(durCom.getExitCode() != 0) {
+                fetch(true);
+                return;
+            }
             thumb = generateWaveform(128, 128);
+        }
     }
 
     public Image generateWaveform(int width, int height) {
@@ -60,12 +79,9 @@ public class AudioAssetData extends AssetData {
                 .addComplexFilter(new Compand())
                 .addComplexFilter(new ShowWavesPic()
                         .setSize(width, height))
-                .addHandler(new ProgressHandler()
-                        .addHandler(pi -> setDuration(pi.duration())))
                 .setOnOutput(file -> {
                     try (InputStream fis = new FileInputStream(file)) {
                         res.set(new Image(fis));
-                        //Files.delete(file.toPath());
                     } catch (IOException x) {
                         ErrorHandler.handle(x, "generate video thumbnail");
                     }
