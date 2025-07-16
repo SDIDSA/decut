@@ -28,7 +28,9 @@ public class ProjectAssets extends ArrayList<File> implements ProjectPart {
     @Override
     public void save(Home owner) {
         for (AssetData asset : LibraryContent.getInstance(owner, Assets.class).getGrid().getData()) {
-            add(asset.getFile());
+            if(owner.isAssetUsed(asset)) {
+                add(asset.getFile());
+            }
         }
     }
 
