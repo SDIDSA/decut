@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.json.JSONObject;
 import org.luke.decut.app.home.menubar.edit.EditMenu;
 import org.luke.decut.app.home.menubar.FileMenu;
 import org.luke.decut.app.inspector.Inspector;
@@ -17,6 +18,7 @@ import org.luke.decut.app.timeline.TimelinePane;
 import org.luke.decut.app.timeline.tracks.Tracks;
 import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
+import org.luke.decut.file.FileDealer;
 import org.luke.decut.file.project.DecutProject;
 import org.luke.decut.render.SegmentRenderer;
 import org.luke.decut.render.TimelineRenderer;
@@ -30,7 +32,7 @@ import java.awt.*;
 import java.io.File;
 
 public class Home extends Page {
-
+    private File openProject;
 
     private final MenuBarButton file;
     private final EditMenu edit;
@@ -284,6 +286,17 @@ public class Home extends Page {
 
     public void load(DecutProject proj) {
         proj.load(this);
+    }
+
+    public void load(File projectFile) {
+        openProject = projectFile;
+        DecutProject proj = new DecutProject();
+        proj.deserialize(new JSONObject(FileDealer.read(projectFile)));
+        load(proj);
+    }
+
+    public File getOpenProject() {
+        return openProject;
     }
 
     @Override

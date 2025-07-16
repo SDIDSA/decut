@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 public class VideoAssetData extends AssetData {
     private static final HashMap<File, VideoAssetData> cache = new HashMap<>();
@@ -30,8 +31,17 @@ public class VideoAssetData extends AssetData {
         fetch();
     }
 
+    public static VideoAssetData byName(File file) {
+        for(Map.Entry<File, VideoAssetData> entry : cache.entrySet()) {
+            if(file.getName().equals(entry.getKey().getName())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
     public static VideoAssetData getData(File file) {
-        VideoAssetData found = cache.get(file);
+        VideoAssetData found = file.exists() ? cache.get(file) : byName(file);
         if (found == null) {
             found = new VideoAssetData(file);
             cache.put(file, found);

@@ -28,9 +28,7 @@ public class FileMenu extends HomeMenuButton {
         addItem(new MetaMenuItem("Open...", "folder", () -> {
             File open = fc.showOpenDialog(owner.getWindow());
             if(open != null) {
-                DecutProject proj = new DecutProject();
-                proj.deserialize(new JSONObject(FileDealer.read(open)));
-                owner.load(proj);
+                owner.load(open);
             }
         }));
         separate();
