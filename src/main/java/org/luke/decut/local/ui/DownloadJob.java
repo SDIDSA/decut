@@ -158,7 +158,6 @@ public class DownloadJob extends LocalInstallUi {
 				os.flush();
 				os.close();
 
-				// extract
 				setState(DownloadState.EXTRACTING);
 
 				ZipUtils.unzipWithProgress(output, targetDir, this::setProgress);

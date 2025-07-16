@@ -7,14 +7,17 @@ import javafx.geometry.Orientation;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.json.JSONObject;
-import org.luke.decut.app.home.menubar.edit.EditMenu;
 import org.luke.decut.app.home.menubar.FileMenu;
+import org.luke.decut.app.home.menubar.edit.EditMenu;
 import org.luke.decut.app.inspector.Inspector;
 import org.luke.decut.app.lib.*;
 import org.luke.decut.app.lib.assets.Assets;
+import org.luke.decut.app.lib.assets.data.AssetData;
 import org.luke.decut.app.preview.Preview;
-import org.luke.decut.app.timeline.controls.snap.SnapStrategy;
 import org.luke.decut.app.timeline.TimelinePane;
+import org.luke.decut.app.timeline.clips.TimelineClip;
+import org.luke.decut.app.timeline.controls.snap.SnapStrategy;
+import org.luke.decut.app.timeline.tracks.Track;
 import org.luke.decut.app.timeline.tracks.Tracks;
 import org.luke.decut.app.timeline.viewport.Viewport;
 import org.luke.decut.ffmpeg.FfmpegCommand;
@@ -30,36 +33,32 @@ import org.luke.gui.window.Window;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class Home extends Page {
-    private File openProject;
-
     private final MenuBarButton file;
     private final EditMenu edit;
-
     private final VBox root;
     private final HBox top;
-
     private final Library library;
     private final TimelinePane timeline;
     private final Preview preview;
     private final Inspector inspector;
-
     private final TimelineRenderer renderer;
     private final SegmentRenderer previewer;
-
     private final DoubleProperty duration;
     private final DoubleProperty frameRate;
     private final DoubleProperty canvasWidth;
     private final DoubleProperty canvasHeight;
-    private SnapStrategy snapStrategy = SnapStrategy.SECOND;
-
-    private double initVSplit;
     private final DoubleProperty vSplit;
-    private double initHSplit1;
     private final DoubleProperty hSplit1;
+    private File openProject;
+    private SnapStrategy snapStrategy = SnapStrategy.SECOND;
+    private double initVSplit;
+    private double initHSplit1;
     private double initHSplit2;
-    private DoubleProperty hSplit2;
+    private final DoubleProperty hSplit2;
 
     public Home(Window window) {
         super(window, new Dimension(500 * 2 + 15 * 4 + 30, 600));
@@ -78,7 +77,7 @@ public class Home extends Page {
         canvasHeight = new SimpleDoubleProperty(720);
 
         library = new Library(this);
-        LibraryTab assets = new LibraryTab(this,"Assets", "assets", Assets.class);
+        LibraryTab assets = new LibraryTab(this, "Assets", "assets", Assets.class);
         library.addTab(assets);
         library.addTab(new LibraryTab(this, "Text", "text", Text.class));
         library.addTab(new LibraryTab(this, "Effects", "effects", Effects.class));
@@ -95,7 +94,7 @@ public class Home extends Page {
 
         double thickness = 7;
 
-        root.setPadding(new Insets(0,thickness,thickness,thickness));
+        root.setPadding(new Insets(0, thickness, thickness, thickness));
 
         top.setMinHeight(USE_PREF_SIZE);
         top.setMaxHeight(USE_PREF_SIZE);
@@ -284,7 +283,31 @@ public class Home extends Page {
         return proj;
     }
 
-    public void load(DecutProject proj) {
+    public void zip(File root) {
+        Assets assets = LibraryContent.getInstance(this, Assets.class);
+        assets.getGrid().getData().forEach(asset -> {
+            if (isAssetUsed(asset)) {
+                try {
+                    Files.copy(asset.getFile().toPath(), new File(root, asset.getFile().getName()).toPath());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+    public boolean isAssetUsed(AssetData asset) {
+        for (Track track : getTracks().getTracks()) {
+            for (TimelineClip clip : track.getContent().getClips()) {
+                if (clip.getSourceAsset() == asset || clip.getSourceAsset().getParent() == asset) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void load(DecutProject proj) {
         proj.load(this);
     }
 

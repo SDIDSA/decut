@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class ZipUtils {
 
@@ -68,4 +69,46 @@ public class ZipUtils {
             }
         }
     }
+
+    public static void zipFolder(File sourceFolder, File zipFile) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             BufferedOutputStream bos = new BufferedOutputStream(fos);
+             ZipOutputStream zos = new ZipOutputStream(bos)) {
+            for (File child : sourceFolder.listFiles()) {
+                zipRecursive(child, sourceFolder.getAbsolutePath(), zos);
+            }
+        }
+    }
+
+    private static void zipRecursive(File fileToZip, String basePath, ZipOutputStream zos) throws IOException {
+        if (fileToZip.isHidden()) {
+            return;
+        }
+
+        String substring = fileToZip.getAbsolutePath().substring(basePath.length() + 1);
+        if (fileToZip.isDirectory()) {
+            File[] children = fileToZip.listFiles();
+            if (children == null || children.length == 0) {
+                String entryName = substring + "/";
+                zos.putNextEntry(new ZipEntry(entryName));
+                zos.closeEntry();
+            } else {
+                for (File childFile : children) {
+                    zipRecursive(childFile, basePath, zos);
+                }
+            }
+        } else {
+            String entryName = substring.replace(File.separatorChar, '/');
+            try (FileInputStream fis = new FileInputStream(fileToZip)) {
+                ZipEntry zipEntry = new ZipEntry(entryName);
+                zos.putNextEntry(zipEntry);
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = fis.read(buffer)) != -1) {
+                    zos.write(buffer, 0, len);
+                }
+            }
+        }
+    }
+
 }

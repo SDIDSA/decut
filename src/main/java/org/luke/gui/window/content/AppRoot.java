@@ -1,10 +1,7 @@
 package org.luke.gui.window.content;
 
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HeaderBar;
-import javafx.scene.layout.HeaderDragType;
 import org.luke.gui.factory.Backgrounds;
-import org.luke.gui.factory.Borders;
 import org.luke.gui.style.Style;
 import org.luke.gui.style.Styleable;
 import org.luke.gui.window.Page;
@@ -12,11 +9,7 @@ import org.luke.gui.window.Window;
 import org.luke.gui.window.content.app_bar.AppBar;
 import org.luke.gui.window.content.app_bar.AppBarButton;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 public class AppRoot extends BorderPane implements Styleable {
