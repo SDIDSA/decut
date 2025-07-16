@@ -1,12 +1,11 @@
 package org.luke.gui.controls.recycle.list;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Pos;
@@ -41,15 +40,15 @@ public class ListContent<T> extends Pane {
 
         StackPane.setAlignment(this, Pos.TOP_CENTER);
 
-        InvalidationListener refresh = _ ->
+        Runnable refresh = () ->
                 applyScroll(listView.getHeight(), listView.getScrollY());
 
-        rowHeight.addListener(refresh);
-        spacing.addListener(refresh);
-        heightProperty().addListener(refresh);
-        listView.getScrollBar().positionProperty().addListener(refresh);
-        listView.heightProperty().addListener(refresh);
-        sortedData.addListener(refresh);
+        rowHeight.addListener((_,_,_) -> refresh.run());
+        spacing.addListener((_,_,_) -> refresh.run());
+        heightProperty().addListener((_,_,_) -> refresh.run());
+        listView.getScrollBar().positionProperty().addListener((_,_,_) -> refresh.run());
+        listView.heightProperty().addListener((_,_,_) -> refresh.run());
+        sortedData.addListener((ListChangeListener<? super T>) _ -> refresh.run());
 
         setMinHeight(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);

@@ -1,6 +1,7 @@
 package org.luke.decut.ffmpeg;
 
 import org.luke.decut.cmd.Command;
+import org.luke.decut.crossplatform.Os;
 import org.luke.decut.ffmpeg.bitrate.Bitrate;
 import org.luke.decut.ffmpeg.codec.Codec;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
@@ -12,6 +13,7 @@ import org.luke.decut.ffmpeg.filters.core.FilterGraph;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
 import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.preset.Preset;
+import org.luke.decut.file.FileDealer;
 import org.luke.decut.local.LocalStore;
 import org.luke.decut.local.managers.FfmpegManager;
 import org.luke.decut.local.managers.LocalInstall;
@@ -55,15 +57,34 @@ public class FfmpegCommand implements CommandPart {
 
     private FfmpegCommand execute(String ffmpegBinary) {
         String comStr = apply(this, ffmpegBinary);
-        Command com = new Command(this::handleLine, this::handleLine, comStr).addOnExit(_ -> {
-            if (output != null && output.exists() && output.length() > 0) {
-                if (onOutput != null) {
-                    onOutput.accept(output);
-                }
-                outputHandled = true;
+        if(comStr.length() > 8191 && Os.fromSystem().isWindows()) {
+            try {
+                File bat = File.createTempFile("decut_com_", ".bat");
+                FileDealer.write(comStr, bat);
+                Command com = new Command(this::handleLine, this::handleLine, bat.getAbsolutePath()).addOnExit(_ -> {
+                    if (output != null && output.exists() && output.length() > 0) {
+                        if (onOutput != null) {
+                            onOutput.accept(output);
+                        }
+                        outputHandled = true;
+                    }
+                });
+                running = com.execute(new File("/"));
+            } catch (IOException e) {
+                ErrorHandler.handle(e, "executing ffmpeg command");
             }
-        });
-        running = com.execute(new File("/"));
+        } else {
+            Command com = new Command(this::handleLine, this::handleLine, comStr).addOnExit(_ -> {
+                if (output != null && output.exists() && output.length() > 0) {
+                    if (onOutput != null) {
+                        onOutput.accept(output);
+                    }
+                    outputHandled = true;
+                }
+            });
+            running = com.execute(new File("/"));
+        }
+
         return this;
     }
 

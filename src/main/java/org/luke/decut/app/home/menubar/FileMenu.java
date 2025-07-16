@@ -53,6 +53,8 @@ public class FileMenu extends HomeMenuButton {
                         .addHandler(pi -> {
                             System.out.println(pi.getProgress());
                         }));
+
+                System.out.println(com.apply(com));
                 Platform.runBack(() -> {
                     com.execute().waitFor();
                     try {

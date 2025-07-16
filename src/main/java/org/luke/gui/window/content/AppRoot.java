@@ -25,10 +25,7 @@ public class AppRoot extends BorderPane implements Styleable {
 
 	public AppRoot(Window window) {
 		bar = new AppBar(window);
-		HeaderBar barCont = new HeaderBar();
-		HeaderBar.setDragType(bar, HeaderDragType.DRAGGABLE);
-		barCont.setCenter(bar);
-		setTop(barCont);
+		setTop(bar);
 		
 		applyStyle(window.getStyl());
 	}

@@ -1,6 +1,8 @@
 package org.luke.gui.window.content.app_bar;
 
 import javafx.geometry.NodeOrientation;
+import javafx.scene.layout.HeaderBar;
+import javafx.scene.layout.HeaderDragType;
 import org.luke.gui.controls.image.ColorIcon;
 import org.luke.gui.controls.space.ExpandingHSpace;
 import org.luke.gui.style.Style;
@@ -12,7 +14,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
-public class AppBar extends HBox implements Styleable {
+public class AppBar extends HeaderBar implements Styleable {
 	private final Window window;
 	private final AppBarButton info;
 	private final ColorIcon icon;
@@ -23,10 +25,6 @@ public class AppBar extends HBox implements Styleable {
 	public AppBar(Window window) {
 		this.window = window;
 		setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-		setPadding(new Insets(0, 5, 0, 10));
-		setMinHeight(30);
-		setAlignment(Pos.CENTER);
-		setSpacing(20);
 
 		icon = new ColorIcon(null, 20);
 		icon.setMouseTransparent(true);
@@ -41,7 +39,12 @@ public class AppBar extends HBox implements Styleable {
 		
 		buttons.getChildren().addAll(info);
 
-		getChildren().addAll(icon, menuBar, new ExpandingHSpace(), buttons);
+		HBox leading = new HBox(10, icon, menuBar);
+		leading.setPadding(new Insets(0,0,0,7));
+		leading.setAlignment(Pos.CENTER_LEFT);
+		setLeading(leading);
+		setTrailing(buttons);
+		//getChildren().addAll(icon, menuBar, new ExpandingHSpace(), buttons);
 		
 		applyStyle(window.getStyl());
 	}

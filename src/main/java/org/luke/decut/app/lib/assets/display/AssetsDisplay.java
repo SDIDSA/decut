@@ -1,7 +1,6 @@
 package org.luke.decut.app.lib.assets.display;
 
-import javafx.beans.InvalidationListener;
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.input.TransferMode;
@@ -87,7 +86,7 @@ public class AssetsDisplay extends StackPane {
         data = MyObservableList.createList();
         filteredData = new FilteredList<>(data, ad -> currentFilter.isPresent(ad.getType()));
 
-        filteredData.addListener((InvalidationListener) _ -> {
+        filteredData.addListener((ListChangeListener<? super AssetData>) _ -> {
             grid.getItems().setAll(filteredData);
             list.getItems().setAll(filteredData);
             refreshDisplay();

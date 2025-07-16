@@ -31,6 +31,7 @@ import java.io.File;
 
 public class Home extends Page {
 
+
     private final MenuBarButton file;
     private final EditMenu edit;
 

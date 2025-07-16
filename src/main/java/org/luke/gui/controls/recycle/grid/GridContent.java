@@ -1,12 +1,11 @@
 package org.luke.gui.controls.recycle.grid;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Pos;
@@ -50,18 +49,18 @@ public class GridContent<T> extends Pane {
 
         StackPane.setAlignment(this, Pos.TOP_CENTER);
 
-        InvalidationListener refresh = _ ->
+        Runnable refresh = () ->
                 applyScroll(gridView.getHeight(), gridView.getScrollY());
 
-        cellWidth.addListener(refresh);
-        cellHeight.addListener(refresh);
-        verticalSpacing.addListener(refresh);
-        horizontalSpacing.addListener(refresh);
-        widthProperty().addListener(refresh);
-        heightProperty().addListener(refresh);
-        gridView.getScrollBar().positionProperty().addListener(refresh);
-        gridView.heightProperty().addListener(refresh);
-        sortedData.addListener(refresh);
+        cellWidth.addListener((_,_,_) -> refresh.run());
+        cellHeight.addListener((_,_,_) -> refresh.run());
+        verticalSpacing.addListener((_,_,_) -> refresh.run());
+        horizontalSpacing.addListener((_,_,_) -> refresh.run());
+        widthProperty().addListener((_,_,_) -> refresh.run());
+        heightProperty().addListener((_,_,_) -> refresh.run());
+        gridView.getScrollBar().positionProperty().addListener((_,_,_) -> refresh.run());
+        gridView.heightProperty().addListener((_,_,_) -> refresh.run());
+        sortedData.addListener((ListChangeListener<? super T>) _ -> refresh.run());
 
         setMinHeight(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);

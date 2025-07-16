@@ -1,8 +1,7 @@
 package org.luke.decut.app.timeline.viewport.content;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
@@ -61,7 +60,7 @@ public class TrackContent extends Pane implements Styleable {
                     track.trackHeightProperty(), label.heightProperty()));
         });
 
-        clips.addListener((InvalidationListener) _ -> {
+        clips.addListener((ListChangeListener<? super TimelineClip>) _ -> {
             if (clips.isEmpty()) {
                 getChildren().setAll(label);
             } else {
@@ -140,6 +139,7 @@ public class TrackContent extends Pane implements Styleable {
         try {
             super.updateBounds();
         } catch (Exception x) {
+            Platform.runLater(() -> getChildren().clear());
             System.out.println("suspect : TrackContent");
         }
     }

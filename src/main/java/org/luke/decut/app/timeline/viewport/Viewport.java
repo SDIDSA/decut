@@ -1,6 +1,5 @@
 package org.luke.decut.app.timeline.viewport;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -83,21 +82,19 @@ public class Viewport extends HorizontalScrollable implements Styleable {
                     owner.getTracks().getTrackList().getScrollBar().positionProperty()
             );
 
-            InvalidationListener rePlayHead = (e) -> {
+            Runnable rePlayHead = () -> {
                 double phx = pre.get() + at.get() * pps.get();
                 playLine.setTranslateX((int) phx);
                 playHead.setTranslateX((int) (phx - playHead.getWidth() / 2));
             };
 
-            pps.addListener(rePlayHead);
-            at.addListener((e) -> {
-                rePlayHead.invalidated(e);
+            pps.addListener((_,_,_) -> rePlayHead.run());
+            at.addListener((_,_,_) -> {
+                rePlayHead.run();
                 ensurePlayheadVisible();
             });
 
-            Platform.runLater(() -> {
-                rePlayHead.invalidated(at);
-            });
+            Platform.runLater(rePlayHead);
 
             trackContents.getScrollBar().translateXProperty().bind(Bindings.createDoubleBinding(() ->
                             -(trackContents.getWidth() - getWidth() - getScrollX()),

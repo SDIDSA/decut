@@ -412,13 +412,4 @@ public class TimelineClip extends Pane implements Styleable {
             setBackground(Backgrounds.make(style.getBackgroundFloatingOr(), 5));
         }
     }
-
-    @Override
-    protected void updateBounds() {
-        try {
-            super.updateBounds();
-        } catch (Exception x) {
-            System.out.println("suspect : Clip");
-        }
-    }
 }

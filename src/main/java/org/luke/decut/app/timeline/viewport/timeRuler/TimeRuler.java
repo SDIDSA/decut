@@ -1,6 +1,5 @@
 package org.luke.decut.app.timeline.viewport.timeRuler;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
@@ -54,7 +53,7 @@ public class TimeRuler extends Pane implements Styleable {
             DoubleProperty duration = owner.durationProperty();
             pixelsPerSecond = owner.ppsProperty();
 
-            InvalidationListener retick = (_) -> {
+            Runnable retick = () -> {
                 if (isOnFxThread()) {
                     updateTicksSafely(scrollX, vpw);
                 } else {
@@ -62,11 +61,11 @@ public class TimeRuler extends Pane implements Styleable {
                 }
             };
 
-            duration.addListener(retick);
-            pixelsPerSecond.addListener(retick);
-            scrollX.addListener(retick);
-            vpw.addListener(retick);
-            owner.framerateProperty().addListener(retick);
+            duration.addListener((_,_,_) -> retick.run());
+            pixelsPerSecond.addListener((_,_,_) -> retick.run());
+            scrollX.addListener((_,_,_) -> retick.run());
+            vpw.addListener((_,_,_) -> retick.run());
+            owner.framerateProperty().addListener((_,_,_) -> retick.run());
         });
 
         setOnMouseMoved(event -> {

@@ -2,7 +2,6 @@ package org.luke.decut.app.timeline.clips;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
