@@ -12,6 +12,7 @@ import org.luke.decut.ffmpeg.handlers.ProgressHandler;
 import org.luke.decut.ffmpeg.options.Seek;
 import org.luke.decut.ffmpeg.options.Skip;
 import org.luke.decut.ffmpeg.options.VFrames;
+import org.luke.decut.ffprobe.FfprobeCommand;
 import org.luke.gui.controls.image.ImageProxy;
 import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.threading.Platform;
@@ -62,16 +63,23 @@ public class VideoAssetData extends AssetData {
     public void fetch(boolean parent) {
         super.fetch();
         if(parent) {
-            long command = System.currentTimeMillis();
-            System.out.println(command + " started");
+            FfprobeCommand durCom = new FfprobeCommand()
+                    .onOutput(str -> {
+                        duration = (long) (Double.parseDouble(str) * 1000);
+                    })
+                    .addArgument("-v")
+                    .addArgument("error")
+                    .addArgument("-show_entries")
+                    .addArgument("format=duration")
+                    .addArgument("-of")
+                    .addArgument("default=noprint_wrappers=1:nokey=1")
+                    .setInput(getFile())
+                    .execute();
+
             FfmpegCommand makeThumbs = new FfmpegCommand()
                     .addInput(getFile())
                     .addOption(new Seek("00:00:01.000"))
                     .addOption(new VFrames(1))
-                    .addHandler(new ProgressHandler()
-                            .addHandler(pi -> {
-                                setDuration(pi.duration());
-                            }))
                     .setOnOutput(file -> {
                                 try (InputStream fis = new FileInputStream(file)) {
                                     Image im = new Image(fis);
@@ -83,7 +91,9 @@ public class VideoAssetData extends AssetData {
                             },
                             ".jpg")
                     .execute();
+
             makeThumbs.waitFor();
+            durCom.waitFor();
 
             String name = getFile().getName();
             String ext = name.substring(name.lastIndexOf("."));
@@ -106,7 +116,6 @@ public class VideoAssetData extends AssetData {
                     .execute();
             makeVid.waitFor();
             makeAud.waitFor();
-            System.out.println(duration);
         }
     }
 

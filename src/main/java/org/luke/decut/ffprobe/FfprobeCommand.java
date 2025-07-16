@@ -1,16 +1,11 @@
 package org.luke.decut.ffprobe;
 
 import org.luke.decut.cmd.Command;
-import org.luke.decut.file.FileDealer;
 import org.luke.decut.local.LocalStore;
 import org.luke.decut.local.managers.FfprobeManager;
-import org.luke.decut.local.managers.FfprobeManager;
 import org.luke.decut.local.managers.LocalInstall;
-import org.luke.gui.exception.ErrorHandler;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,52 +38,26 @@ public class FfprobeCommand {
     }
 
     public FfprobeCommand execute() {
-        try {
-            List<String> command = new ArrayList<>();
-            command.add(getFfprobeBinary());
-            command.addAll(args);
-            command.add("-i");
-            command.add(input.getAbsolutePath());
+        List<String> command = new ArrayList<>();
+        command.add(getFfprobeBinary());
+        command.addAll(args);
+        command.add("-i");
+        command.add(input.getAbsolutePath());
 
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.redirectErrorStream(true);
-
-            running = builder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(running.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (onOutput != null) onOutput.accept(line);
-            }
-
-            running.waitFor();
-
-        } catch (Exception e) {
-            ErrorHandler.handle(e, "executing ffprobe");
-        }
-
+        Command com = new Command(onOutput, onError, String.join(" ", command));
+        running = com.execute(new File("/"));
         return this;
     }
 
-    public String executeAndGetSingleLineOutput() {
-        try {
-            List<String> command = new ArrayList<>();
-            command.add(getFfprobeBinary());
-            command.addAll(args);
-            command.add(input.getAbsolutePath());
-
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.redirectErrorStream(true);
-
-            running = builder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(running.getInputStream()));
-            return reader.readLine();
-
-        } catch (Exception e) {
-            ErrorHandler.handle(e, "executing ffprobe");
-            return null;
+    public FfprobeCommand waitFor() {
+        if (running != null && running.isAlive()) {
+            try {
+                running.waitFor();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return this;
     }
 
     public static String getFfprobeBinary() {
