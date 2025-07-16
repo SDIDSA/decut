@@ -30,6 +30,7 @@ public class AppBar extends HeaderBar implements Styleable {
 		icon.setMouseTransparent(true);
 
 		menuBar = new HBox(15);
+		menuBar.setAlignment(Pos.CENTER_LEFT);
 
 		buttons = new HBox(4);
 		buttons.setAlignment(Pos.CENTER);
