@@ -7,6 +7,8 @@ import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.bitrate.AudioBitrate;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.filter_complex.audio.APad;
+import org.luke.decut.ffmpeg.filter_complex.video.Scale;
+import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.options.Seek;
 import org.luke.decut.ffmpeg.options.Skip;
 import org.luke.decut.ffmpeg.options.VFrames;
@@ -107,10 +109,15 @@ public class VideoAssetData extends AssetData {
             FfmpegCommand makeVid = new FfmpegCommand()
                     .addInput(getFile())
                     .addOption(Skip.AUDIO)
-                    .setCodec(VideoCodec.COPY)
+                    .addOption(new FfmpegOption("profile:v").setValue("dnxhd"))
+                    .addOption(new FfmpegOption("pix_fmt").setValue("yuv422p"))
+                    .addOption(new FfmpegOption("s").setValue("1280x720"))
+                    .addOption(new FfmpegOption("r").setValue("30"))
+                    .addOption(new FfmpegOption("b:v").setValue("60M"))
+                    .setCodec(VideoCodec.DNXHD)
                     .setOnOutput(file -> {
                         video = SubVideoAssetData.getData(file, this);
-                    }, ext)
+                    }, ".mxf")
                     .execute();
             makeVid.waitFor();
             makeAud.waitFor();

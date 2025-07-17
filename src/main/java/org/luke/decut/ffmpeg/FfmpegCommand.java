@@ -38,6 +38,7 @@ public class FfmpegCommand implements CommandPart {
     private File output;
     private Consumer<File> onOutput;
     private boolean outputHandled = false;
+    private Command runningCom;
     private Process running;
     private Preset preset;
 
@@ -55,9 +56,40 @@ public class FfmpegCommand implements CommandPart {
         complexFilterGraph = new ComplexFilterGraph();
     }
 
+    public static String getFfmpegBinary() {
+        String defStr = LocalStore.getDefaultFfmpeg();
+        if (defStr == null) {
+            if (systemFfmpeg()) {
+                return "ffmpeg";
+            } else {
+                return null;
+            }
+        }
+
+        File ffmpegRoot = new File(defStr);
+        if (!ffmpegRoot.exists() || !ffmpegRoot.isDirectory()) {
+            if (systemFfmpeg()) {
+                return "ffmpeg";
+            } else {
+                return null;
+            }
+        }
+
+        LocalInstall ffmpeg = FfmpegManager.versionOf(ffmpegRoot.getAbsolutePath());
+        if (ffmpeg == null) {
+            return null;
+        }
+        return "\"" + ffmpeg.getBinary().getAbsolutePath() + "\"";
+    }
+
+    public static boolean systemFfmpeg() {
+        String version = FfmpegManager.getFFmpegVersion("ffmpeg");
+        return version != null;
+    }
+
     private FfmpegCommand execute(String ffmpegBinary) {
         String comStr = apply(this, ffmpegBinary);
-        if(comStr.length() > 8191 && Os.fromSystem().isWindows()) {
+        if (comStr.length() > 8191 && Os.fromSystem().isWindows()) {
             try {
                 File bat = File.createTempFile("decut_com_", ".bat");
                 FileDealer.write(comStr, bat);
@@ -69,6 +101,7 @@ public class FfmpegCommand implements CommandPart {
                         outputHandled = true;
                     }
                 });
+                runningCom = com;
                 running = com.execute(new File("/"));
             } catch (IOException e) {
                 ErrorHandler.handle(e, "executing ffmpeg command");
@@ -82,41 +115,20 @@ public class FfmpegCommand implements CommandPart {
                     outputHandled = true;
                 }
             });
+            runningCom = com;
             running = com.execute(new File("/"));
         }
 
         return this;
     }
 
-    public static String getFfmpegBinary() {
-        String defStr = LocalStore.getDefaultFfmpeg();
-        if(defStr == null) {
-            if(systemFfmpeg()) {
-                return "ffmpeg";
-            } else {
-                return null;
-            }
-        }
-
-        File ffmpegRoot = new File(defStr);
-        if(!ffmpegRoot.exists() || !ffmpegRoot.isDirectory()) {
-            if(systemFfmpeg()) {
-                return "ffmpeg";
-            } else {
-                return null;
-            }
-        }
-
-        LocalInstall ffmpeg = FfmpegManager.versionOf(ffmpegRoot.getAbsolutePath());
-        if(ffmpeg == null) {
-            return null;
-        }
-        return "\"" + ffmpeg.getBinary().getAbsolutePath() + "\"";
+    public Command getRunningCom() {
+        return runningCom;
     }
 
     public FfmpegCommand execute() {
         String ffmpegBinary = getFfmpegBinary();
-        if(ffmpegBinary == null) return this;
+        if (ffmpegBinary == null) return this;
         return execute(ffmpegBinary);
     }
 
@@ -125,8 +137,13 @@ public class FfmpegCommand implements CommandPart {
     }
 
     public FfmpegCommand waitFor() {
-        Platform.waitWhile(() -> running == null);
-        if (running != null && running.isAlive()) {
+        Platform.waitWhile(() -> running == null, 10000);
+        if(running == null) {
+            System.out.println(apply(this));
+            System.out.println("\texecution failed, retrying...");
+            return execute().waitFor();
+        }
+        if (running.isAlive()) {
             try {
                 running.waitFor();
             } catch (InterruptedException e) {
@@ -146,13 +163,13 @@ public class FfmpegCommand implements CommandPart {
         return this;
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
     public FfmpegCommand setDuration(long duration) {
         this.duration = duration;
         return this;
-    }
-
-    public long getDuration() {
-        return duration;
     }
 
     public FfmpegCommand addFilterGraph(FilterGraph graph) {
@@ -307,10 +324,5 @@ public class FfmpegCommand implements CommandPart {
     @Override
     public String apply(FfmpegCommand command) {
         return apply(command, getFfmpegBinary());
-    }
-
-    public static boolean systemFfmpeg() {
-        String version = FfmpegManager.getFFmpegVersion("ffmpeg");
-        return version != null;
     }
 }

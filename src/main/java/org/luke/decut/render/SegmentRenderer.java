@@ -57,7 +57,7 @@ public class SegmentRenderer {
     public FfmpegCommand renderSegmentFrames(File outputDir, double startTime, double duration) {
         FfmpegCommand command = new FfmpegCommand();
 
-        File outputPattern = new File(outputDir, "frame_%06d.jpg");
+        File outputPattern = new File(outputDir, "frame_%06d.bmp");
         command.setOutput(outputPattern);
 
         command.addOption(new FfmpegOption("f").setValue("image2"));

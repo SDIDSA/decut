@@ -10,8 +10,8 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.luke.decut.crossplatform.Os;
@@ -30,11 +30,15 @@ public class Command {
 
     private boolean urlDecode = false;
 
+    private AtomicBoolean streamClosed;
+
     public Command(Consumer<String> inputHandler, Consumer<String> errorHandler, String... command) {
         this.command = Os.fromSystem().addCommandPrefix(command);
         this.inputHandlers = new ArrayList<>();
         this.errorHandlers = new ArrayList<>();
         this.onExit = new ArrayList<>();
+
+        streamClosed = new AtomicBoolean(false);
 
         if (inputHandler != null)
             inputHandlers.add(inputHandler);
@@ -116,6 +120,7 @@ public class Command {
         onExit.clear();
         try {
             int exitCode = process.waitFor();
+            Platform.waitWhile(() -> !streamClosed.get());
             onExits.forEach(oe -> oe.accept(exitCode));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -134,6 +139,7 @@ public class Command {
                             handler.accept(fline);
                     });
                 }
+                streamClosed.set(true);
             } catch (IOException e) {
                 ErrorHandler.handle(e, "handling output");
             }

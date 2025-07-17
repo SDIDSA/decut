@@ -256,15 +256,16 @@ public class Preview extends VBox implements Styleable {
                 File tempDir = Files.createTempDirectory("decut_prev_" + index).toFile();
                 FfmpegCommand imageCom = owner.previewFrames(tempDir, start, SEG_SIZE);
                 imageCom.execute();
+                imageCom.waitFor();
 
                 File audioFile = new File(tempDir, "audio_" + index + ".wav");
                 FfmpegCommand audioCom = owner.previewAudio(audioFile, start, SEG_SIZE);
                 audioCom.execute();
 
-                imageCom.waitFor();
                 audioCom.waitFor();
 
-                File[] imageFiles = tempDir.listFiles((dir, name) -> name.matches("frame_\\d{6}\\.jpg"));
+
+                File[] imageFiles = tempDir.listFiles((dir, name) -> name.matches("frame_\\d{6}\\.bmp"));
                 if (imageFiles == null || imageFiles.length == 0) {
                     throw new IOException("No frames rendered for segment " + index);
                 }

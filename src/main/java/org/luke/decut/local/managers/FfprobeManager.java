@@ -163,6 +163,9 @@ public class FfprobeManager {
 	}
 
 	public static LocalInstall versionOf(String path) {
+		if(!versionCache.containsKey(path)) {
+			versionCache.put(path, versionFromDir(new File(path)));
+		}
 		return versionCache.get(path);
 	}
 
@@ -215,19 +218,14 @@ public class FfprobeManager {
 				}
 			}
 		};
-        try {
-            new Command(ffprobeBinary, "-version")
-                    .addErrorHandler(parser)
-                    .addInputHandler(parser)
-                    .execute(new File("/"))
-                    .waitFor();
-            if(versionRef.get() != null) {
-				return versionRef.get();
-			}
-        } catch (InterruptedException e) {
-			ErrorHandler.handle(e, "parse ffprobe version from binary");
+        new Command(ffprobeBinary, "-version")
+                .addErrorHandler(parser)
+                .addInputHandler(parser)
+                .executeAndJoin(new File("/"));
+        if(versionRef.get() != null) {
+            return versionRef.get();
         }
-		return null;
+        return null;
     }
 
 	private static String extractVersionFromLine(String line) {
