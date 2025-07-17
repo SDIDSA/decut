@@ -252,7 +252,7 @@ public class FfmpegManager {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error parsing version line: " + line);
+			ErrorHandler.handle(e, "parse Ffmpeg version");
 		}
 		return null;
 	}

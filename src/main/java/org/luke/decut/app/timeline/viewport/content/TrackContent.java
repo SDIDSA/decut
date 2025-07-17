@@ -70,21 +70,13 @@ public class TrackContent extends Pane implements Styleable {
 
         assetDragHandler = new AssetDragHandler(owner, track, this);
 
-        setOnDragEntered(event -> {
-            assetDragHandler.onDragEntered(event);
-        });
+        setOnDragEntered(assetDragHandler::onDragEntered);
 
-        setOnDragExited(event -> {
-            assetDragHandler.onDragExited(event);
-        });
+        setOnDragExited(assetDragHandler::onDragExited);
 
-        setOnDragOver(event -> {
-            assetDragHandler.onDragOver(event);
-        });
+        setOnDragOver(assetDragHandler::onDragOver);
 
-        setOnDragDropped(event -> {
-            assetDragHandler.onDragDropped(event);
-        });
+        setOnDragDropped(assetDragHandler::onDragDropped);
 
         getChildren().add(label);
 
@@ -102,15 +94,13 @@ public class TrackContent extends Pane implements Styleable {
     }
 
     public TimelineClip createClip(AssetData asset, double at) {
-        TimelineClip newClip = switch (asset.getType()) {
+        return switch (asset.getType()) {
             case AUDIO -> new AudioClip(owner, track, (AudioAssetData) asset, at);
             case VIDEO -> new VideoClip(owner, track, (VideoAssetData) asset, at);
             default ->
-                // For images or any other asset type, use the default TimelineClip.
-                // You could also create a dedicated ImageClip class if needed.
+                    //TODO handle more clip types
                     new TimelineClip(owner, track, asset, at);
         };
-        return newClip;
     }
 
     public ObservableList<TimelineClip> getClips() {
@@ -132,15 +122,5 @@ public class TrackContent extends Pane implements Styleable {
     public void applyStyle(Style style) {
         label.setFill(style.getTextNormal());
         setBackground(Backgrounds.make(style.getBackgroundModifierHover(), 5, new Insets(3, 0, 3, 0)));
-    }
-
-    @Override
-    protected void updateBounds() {
-        try {
-            super.updateBounds();
-        } catch (Exception x) {
-            Platform.runLater(() -> getChildren().clear());
-            System.out.println("suspect : TrackContent");
-        }
     }
 }

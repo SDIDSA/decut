@@ -311,10 +311,10 @@ public class Home extends Page {
         proj.load(this);
     }
 
-    public void load(File projectFile) {
+    public void load(File projectFile, boolean zipped) {
         openProject = projectFile;
         DecutProject proj = new DecutProject();
-        proj.deserialize(new JSONObject(FileDealer.read(projectFile)));
+        proj.deserialize(projectFile, new JSONObject(FileDealer.read(projectFile)), zipped);
         load(proj);
     }
 

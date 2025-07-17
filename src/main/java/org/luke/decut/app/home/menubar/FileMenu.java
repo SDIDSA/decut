@@ -1,11 +1,9 @@
 package org.luke.decut.app.home.menubar;
 
 import javafx.stage.FileChooser;
-import org.json.JSONObject;
 import org.luke.decut.app.home.Home;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
-import org.luke.decut.file.project.DecutProject;
 import org.luke.decut.file.FileDealer;
 import org.luke.gui.controls.popup.context.meta.MetaMenuItem;
 import org.luke.gui.controls.popup.context.meta.MetaMenuMenu;
@@ -35,7 +33,7 @@ public class FileMenu extends HomeMenuButton {
         addItem(new MetaMenuItem("Open...", "folder", () -> {
             File open = fc.showOpenDialog(owner.getWindow());
             if(open != null) {
-                owner.load(open);
+                owner.load(open, false);
             }
         }));
 
@@ -44,7 +42,7 @@ public class FileMenu extends HomeMenuButton {
         addItem(new MetaMenuItem("Save as...", () -> {
             File saveTo = fc.showSaveDialog(owner.getWindow());
             if(saveTo != null) {
-                FileDealer.write(owner.save().serialize().toString(), saveTo);
+                FileDealer.write(owner.save().serialize(false).toString(), saveTo);
             }
         }));
 
@@ -54,9 +52,7 @@ public class FileMenu extends HomeMenuButton {
             if(saveTo != null) {
                 FfmpegCommand com = owner.render(saveTo);
                 com.addHandler(new ProgressHandler()
-                        .addHandler(pi -> {
-                            System.out.println(pi.getProgress());
-                        }));
+                        .addHandler(pi -> System.out.println(pi.getProgress())));
 
                 Platform.runBack(() -> {
                     com.execute().waitFor();
@@ -76,7 +72,7 @@ public class FileMenu extends HomeMenuButton {
                     File root = Files.createTempDirectory("decut_zip").toFile();
                     owner.zip(root);
                     File projFile = new File(root, "project.dcx");
-                    FileDealer.write(owner.save().serialize().toString(), projFile);
+                    FileDealer.write(owner.save().serialize(true).toString(), projFile);
                     ZipUtils.zipFolder(root, saveTo);
                 } catch (IOException e) {
                     ErrorHandler.handle(e, "zip project");
@@ -88,11 +84,9 @@ public class FileMenu extends HomeMenuButton {
             if(open != null) {
                 try {
                     File root = Files.createTempDirectory("decut_zip").toFile();
-                    ZipUtils.unzipWithProgress(open, root, p -> {
-                        System.out.println("unzipping : " + p);
-                    });
+                    ZipUtils.unzipWithProgress(open, root, p -> System.out.println("unzipping : " + p));
                     File proj = new File(root, "project.dcx");
-                    owner.load(proj);
+                    owner.load(proj, true);
                 } catch (IOException e) {
                     ErrorHandler.handle(e, "unzip project");
                 }

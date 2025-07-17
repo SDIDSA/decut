@@ -129,7 +129,6 @@ public class Command {
             try {
                 while ((line = br.readLine()) != null) {
                     String fline = line.trim();
-                    System.out.println(line);
                     handlers.forEach(handler -> {
                         if (handler != null)
                             handler.accept(fline);

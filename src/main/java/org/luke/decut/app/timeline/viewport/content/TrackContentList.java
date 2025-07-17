@@ -44,14 +44,4 @@ public class TrackContentList extends VerticalScrollable implements Styleable {
     public void applyStyle(Style style) {
         getScrollBar().setThumbFill(style.getTextMuted());
     }
-
-    @Override
-    protected void updateBounds() {
-        try {
-            super.updateBounds();
-        } catch (Exception x) {
-            Platform.runLater(() -> getChildren().clear());
-            System.out.println("suspect : TrackContentList");
-        }
-    }
 }

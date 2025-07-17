@@ -252,7 +252,7 @@ public class FfprobeManager {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error parsing version line: " + line);
+			ErrorHandler.handle(e, "parse Ffprobe version");
 		}
 		return null;
 	}

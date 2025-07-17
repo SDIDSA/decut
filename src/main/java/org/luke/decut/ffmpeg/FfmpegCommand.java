@@ -120,7 +120,12 @@ public class FfmpegCommand implements CommandPart {
         return execute(ffmpegBinary);
     }
 
+    public int getExitCode() {
+        return running.exitValue();
+    }
+
     public FfmpegCommand waitFor() {
+        Platform.waitWhile(() -> running == null);
         if (running != null && running.isAlive()) {
             try {
                 running.waitFor();

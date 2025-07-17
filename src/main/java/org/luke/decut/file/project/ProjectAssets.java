@@ -11,17 +11,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ProjectAssets extends ArrayList<File> implements ProjectPart {
-    public JSONArray serialize() {
+    public JSONArray serialize(boolean zipped) {
         JSONArray arr = new JSONArray();
         for (File asset : this) {
-            arr.put(asset.getAbsolutePath());
+            arr.put(zipped ? asset.getName() : asset.getAbsolutePath());
         }
         return arr;
     }
 
-    public void deserialize(JSONArray arr) {
+    public void deserialize(File projectFile, JSONArray arr, boolean zipped) {
         for(int i = 0; i < arr.length(); i++) {
-            add(new File(arr.getString(i)));
+            String assetPath = arr.getString(i);
+            add(zipped ?
+                    new File(projectFile.getParent(), assetPath) :
+                    new File(assetPath));
         }
     }
 
