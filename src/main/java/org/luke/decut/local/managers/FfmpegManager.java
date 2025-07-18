@@ -196,13 +196,13 @@ public class FfmpegManager {
             } else if (isFFmpegBinary(sf)) {
                 if (!Os.fromSystem().isWindows() && !sf.canExecute()) {
                     try {
-                        new Command("chmod a+x \"" + sf.getAbsolutePath() + "\"")
+                        new Command("chmod", "a+x", sf.getAbsolutePath())
                                 .execute().waitFor();
                     } catch (InterruptedException e) {
                         ErrorHandler.handle(e, "enabling the execution of the ffmpeg binary");
                     }
                 }
-                String version = getFFmpegVersion("\"" + sf.getAbsolutePath() + "\"");
+                String version = getFFmpegVersion(sf.getAbsolutePath());
                 if (version != null) {
                     return new LocalInstall(sf.getParentFile(), sf, version);
                 }

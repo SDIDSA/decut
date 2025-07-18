@@ -12,11 +12,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class FfprobeCommand {
+    private static String binary;
+
     private final List<String> args = new ArrayList<>();
     private File input;
     private Consumer<String> onOutput;
     private Consumer<String> onError;
     private Process running;
+
+    public static void resetBinary() {
+        binary = getFfprobeBinary();
+    }
 
     public static String getFfprobeBinary() {
         String defStr = LocalStore.getDefaultFfprobe();
@@ -41,7 +47,7 @@ public class FfprobeCommand {
         if (ffprobe == null) {
             return null;
         }
-        return "\"" + ffprobe.getBinary().getAbsolutePath() + "\"";
+        return ffprobe.getBinary().getAbsolutePath();
     }
 
     public static boolean systemFfprobe() {
@@ -70,10 +76,10 @@ public class FfprobeCommand {
 
     public FfprobeCommand execute() {
         List<String> command = new ArrayList<>();
-        command.add(getFfprobeBinary());
+        command.add(binary);
         command.addAll(args);
         command.add("-i");
-        command.add("\"" + input.getAbsolutePath() + "\"");
+        command.add(input.getAbsolutePath());
 
         Command com = new Command(onOutput, onError, command.toArray(new String[0]));
         running = com.execute();
@@ -87,7 +93,7 @@ public class FfprobeCommand {
     public FfprobeCommand waitFor() {
         Platform.waitWhile(() -> running == null, 10000);
         if(running == null) {
-            System.out.println(getFfprobeBinary() + " " + String.join(" ", args) + " -i " + input);
+            System.out.println(binary + " " + String.join(" ", args) + " -i " + input);
             System.out.println("\texecution failed, retrying...");
             return execute().waitFor();
         }

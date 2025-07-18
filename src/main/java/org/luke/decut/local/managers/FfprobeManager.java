@@ -179,13 +179,13 @@ public class FfprobeManager {
 			} else if (isFfprobeBinary(sf)) {
 				if(!Os.fromSystem().isWindows() && !sf.canExecute()) {
                     try {
-                        new Command("chmod a+x \"" + sf.getAbsolutePath() + "\"")
+                        new Command("chmod", "a+x", sf.getAbsolutePath())
                                 .execute().waitFor();
                     } catch (InterruptedException e) {
                         ErrorHandler.handle(e, "enabling the execution of the ffprobe binary");
                     }
                 }
-				String version = getFfprobeVersion("\""+sf.getAbsolutePath()+"\"");
+				String version = getFfprobeVersion(sf.getAbsolutePath());
 				if (version != null) {
 					return new LocalInstall(sf.getParentFile(), sf, version);
 				}

@@ -53,6 +53,8 @@ public class DecutAction {
                     Decut.instance::openFfprobeConfig,
                     () -> FfprobeCommand.getFfprobeBinary() != null);
         } else {
+            FfmpegCommand.resetBinary();
+            FfprobeCommand.resetBinary();
             if (perform != null) perform.run();
         }
     }

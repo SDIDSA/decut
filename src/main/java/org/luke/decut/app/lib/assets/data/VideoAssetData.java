@@ -11,6 +11,7 @@ import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.options.Seek;
 import org.luke.decut.ffmpeg.options.Skip;
 import org.luke.decut.ffmpeg.options.VFrames;
+import org.luke.decut.ffmpeg.preset.Preset;
 import org.luke.decut.ffprobe.FfprobeCommand;
 import org.luke.gui.controls.image.ImageProxy;
 import org.luke.gui.exception.ErrorHandler;
@@ -108,15 +109,16 @@ public class VideoAssetData extends AssetData {
             FfmpegCommand makeVid = new FfmpegCommand()
                     .addInput(getFile())
                     .addOption(Skip.AUDIO)
-                    .addOption(new FfmpegOption("profile:v").setValue("dnxhd"))
-                    .addOption(new FfmpegOption("pix_fmt").setValue("yuv422p"))
-                    .addOption(new FfmpegOption("s").setValue("1280x720"))
-                    .addOption(new FfmpegOption("r").setValue("30"))
-                    .addOption(new FfmpegOption("b:v").setValue("60M"))
-                    .setCodec(VideoCodec.DNXHD)
+//                    .addOption(new FfmpegOption("profile:v").setValue("dnxhd"))
+//                    .addOption(new FfmpegOption("pix_fmt").setValue("yuv422p"))
+//                    .addOption(new FfmpegOption("s").setValue("1280x720"))
+//                    .addOption(new FfmpegOption("r").setValue("30"))
+//                    .addOption(new FfmpegOption("b:v").setValue("60M"))
+                    .setCodec(VideoCodec.H264)
+                    .setPreset(Preset.ULTRAFAST)
                     .setOnOutput(file -> {
                         video = SubVideoAssetData.getData(file, this);
-                    }, ".mxf")
+                    }, ".mp4")
                     .execute();
             makeVid.waitFor();
             makeAud.waitFor();

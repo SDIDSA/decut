@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class FfmpegCommand implements CommandPart {
+    private static String binary;
+
     private final ArrayList<FfmpegInput> inputs;
     private final ArrayList<LineHandler> handlers;
     private final ArrayList<FilterGraph> graphs;
@@ -57,6 +59,10 @@ public class FfmpegCommand implements CommandPart {
         complexFilterGraph = new ComplexFilterGraph();
     }
 
+    public static void resetBinary() {
+        binary = getFfmpegBinary();
+    }
+
     public static String getFfmpegBinary() {
         String defStr = LocalStore.getDefaultFfmpeg();
         if (defStr == null) {
@@ -80,7 +86,7 @@ public class FfmpegCommand implements CommandPart {
         if (ffmpeg == null) {
             return null;
         }
-        return "\"" + ffmpeg.getBinary().getAbsolutePath() + "\"";
+        return ffmpeg.getBinary().getAbsolutePath();
     }
 
     public static boolean systemFfmpeg() {
@@ -109,7 +115,7 @@ public class FfmpegCommand implements CommandPart {
     }
 
     public FfmpegCommand execute() {
-        String ffmpegBinary = getFfmpegBinary();
+        String ffmpegBinary = binary;
         if (ffmpegBinary == null) return this;
         return execute(ffmpegBinary);
     }
@@ -322,6 +328,6 @@ public class FfmpegCommand implements CommandPart {
 
     @Override
     public List<String> apply(FfmpegCommand command) {
-        return apply(command, getFfmpegBinary());
+        return apply(command, binary);
     }
 }
