@@ -23,7 +23,10 @@ public class TimelineControls extends HBox {
 
         TimelineButton frame = new TimelineButton(owner.getWindow(),
                 "frame", "Full screen");
+
         SnapControl snap = new SnapControl(owner);
+
+        PreviewQuality previewQuality = new PreviewQuality(owner);
 
         zoom = new ZoomControls(owner);
 
@@ -33,7 +36,7 @@ public class TimelineControls extends HBox {
                 "trash", "Remove clip");
 
 
-        getChildren().addAll(crop, frame, snap, new ExpandingHSpace(), playback, new ExpandingHSpace(), zoom, delete);
+        getChildren().addAll(crop, frame, snap, previewQuality, new ExpandingHSpace(), playback, new ExpandingHSpace(), zoom, delete);
     }
 
     public DoubleProperty timeScale() {

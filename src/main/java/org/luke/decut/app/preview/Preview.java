@@ -34,6 +34,8 @@ public class Preview extends VBox implements Styleable {
     private final ImageView view;
     private final Home owner;
 
+    private double qualityFactor = 0.5;
+
     private int currentSegment = -1;
     private FrameSequence currentSequence;
     private final AtomicBoolean isPlaying = new AtomicBoolean(false);
@@ -102,12 +104,17 @@ public class Preview extends VBox implements Styleable {
         applyStyle(owner.getWindow().getStyl());
     }
 
+    public void setQualityFactor(double qualityFactor) {
+        this.qualityFactor = qualityFactor;
+        clearCache();
+    }
+
     private void initAudio() {
         try {
             AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
             audioLine = (SourceDataLine) AudioSystem.getLine(info);
-            audioLine.open(format, 44100 * 4); // 1-second buffer
+            audioLine.open(format, 44100 * 4);
             audioLine.start();
 
             isAudioRunning.set(true);
@@ -133,11 +140,11 @@ public class Preview extends VBox implements Styleable {
     }
 
     public void clearCache() {
-        pause();
+        owner.pausePlayback();
         ArrayList<Integer> toRemove = new ArrayList<>();
         File out = Os.fromSystem().getDecutRoot();
         segments.keySet().forEach(index -> {
-            FfmpegCommand imgCom = owner.previewFrames(out, index * SEG_SIZE, SEG_SIZE);
+            FfmpegCommand imgCom = owner.previewFrames(out, index * SEG_SIZE, SEG_SIZE, qualityFactor);
             FfmpegCommand audioCom = owner.previewAudio(out, index * SEG_SIZE, SEG_SIZE);
             String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg").toString() + audioCom.setOutput(out).apply(audioCom, "ffmpeg").toString();
             if(segments.get(index) != null && !segments.get(index).getCommand().equals(com)) {
@@ -152,7 +159,8 @@ public class Preview extends VBox implements Styleable {
         });
         toRemove.forEach(loadingSegments::remove);
         if (currentSequence != null) {
-            FfmpegCommand imgCom = owner.previewFrames(out, currentSegment * SEG_SIZE, SEG_SIZE);
+            view.setImage(null);
+            FfmpegCommand imgCom = owner.previewFrames(out, currentSegment * SEG_SIZE, SEG_SIZE, qualityFactor);
             FfmpegCommand audioCom = owner.previewAudio(out, currentSegment * SEG_SIZE, SEG_SIZE);
             String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg").toString() + audioCom.setOutput(out).apply(audioCom, "ffmpeg").toString();
             if(!currentSequence.getCommand().equals(com)) {
@@ -166,7 +174,7 @@ public class Preview extends VBox implements Styleable {
 
     private void switchToSegment(int index, double time) {
         if (index * SEG_SIZE >= owner.durationProperty().get()) {
-            pause();
+            owner.pausePlayback();
             return;
         }
         if (index == currentSegment && currentSequence != null) {
@@ -179,6 +187,7 @@ public class Preview extends VBox implements Styleable {
             setCurrentSequence(sequence, index, time);
             preloadAdjacentSegments(index);
         } else {
+            view.setImage(null);
             boolean wasPlaying = frameTimer.isRunning();
             frameTimer.stop();
             CompletableFuture<FrameSequence> loadingFuture = loadingSegments.get(index);
@@ -274,9 +283,9 @@ public class Preview extends VBox implements Styleable {
         CompletableFuture<FrameSequence> future = CompletableFuture.supplyAsync(() -> {
             try {
                 double start = index * SEG_SIZE;
-
+                long diag = System.currentTimeMillis();
                 File tempDir = Files.createTempDirectory("decut_prev_" + index).toFile();
-                FfmpegCommand imageCom = owner.previewFrames(tempDir, start, SEG_SIZE);
+                FfmpegCommand imageCom = owner.previewFrames(tempDir, start, SEG_SIZE, qualityFactor);
                 imageCom.execute();
 
                 File audioFile = new File(tempDir, "audio_" + index + ".wav");
@@ -299,6 +308,8 @@ public class Preview extends VBox implements Styleable {
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
                 byte[] audioData = audioStream.readAllBytes();
                 audioStream.close();
+
+                System.out.println((System.currentTimeMillis() - diag) + " ms");
 
                 String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom, "ffmpeg").toString() + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom, "ffmpeg").toString();
                 FrameSequence sequence = new FrameSequence(com, frames, audioData, audioStream,
@@ -470,7 +481,7 @@ public class Preview extends VBox implements Styleable {
 
             if (currentTime >= owner.durationProperty().get()) {
                 stop();
-                pause();
+                owner.pausePlayback();
                 return;
             }
 

@@ -177,12 +177,20 @@ public class Home extends Page {
         return renderer.generateRenderCommand(file);
     }
 
-    public FfmpegCommand previewFrames(File file, double startTime, double duration) {
-        return previewer.renderSegmentFrames(file, startTime, duration);
+    public FfmpegCommand previewFrames(File file, double startTime, double duration, double qualityFactor) {
+        return previewer.renderSegmentFrames(file, startTime, duration, qualityFactor);
     }
 
     public FfmpegCommand previewAudio(File file, double startTime, double duration) {
         return previewer.renderSegmentAudio(file, startTime, duration);
+    }
+
+    public void setPreviewQuality(double qualityFactor) {
+        if (preview == null) {
+            Platform.waitWhile(() -> preview == null, () -> preview.setQualityFactor(qualityFactor), 5000);
+        } else {
+            preview.setQualityFactor(qualityFactor);
+        }
     }
 
     public void playPreview() {

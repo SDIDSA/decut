@@ -8,14 +8,12 @@ import org.luke.decut.app.timeline.tracks.Track;
 import org.luke.decut.app.timeline.viewport.content.TrackContent;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.codec.AudioCodec;
-import org.luke.decut.ffmpeg.core.StreamType;
 import org.luke.decut.ffmpeg.filter_complex.audio.*;
 import org.luke.decut.ffmpeg.filter_complex.core.ComplexFilterNode;
 import org.luke.decut.ffmpeg.filter_complex.video.*;
 import org.luke.decut.ffmpeg.options.Duration;
 import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.options.Map;
-import org.luke.decut.ffmpeg.options.Skip;
 
 import java.io.File;
 import java.util.*;
@@ -54,7 +52,7 @@ public class SegmentRenderer {
         return owner.getTracks().getTracks().indexOf(track);
     }
 
-    public FfmpegCommand renderSegmentFrames(File outputDir, double startTime, double duration) {
+    public FfmpegCommand renderSegmentFrames(File outputDir, double startTime, double duration, double qualityFactor) {
         FfmpegCommand command = new FfmpegCommand();
 
         File outputPattern = new File(outputDir, "frame_%06d.bmp");
@@ -94,7 +92,7 @@ public class SegmentRenderer {
         command.setDuration((long) (duration * 1000));
         command.addOption(new Duration(duration));
 
-        String finalVideoLabel = processVideoClips(command, videoClips, fileToInputIndex, duration, startTime);
+        String finalVideoLabel = processVideoClips(command, videoClips, fileToInputIndex, duration, startTime, qualityFactor);
 
         if (finalVideoLabel != null) {
             command.addOption(new Map(finalVideoLabel));
@@ -151,7 +149,8 @@ public class SegmentRenderer {
     }
 
     private String processVideoClips(FfmpegCommand command, List<VideoClip> videoClips,
-                                     HashMap<File, Integer> fileToInputIndex, double duration, double startTime) {
+                                     HashMap<File, Integer> fileToInputIndex, double duration, double startTime,
+                                     double qualityFactor) {
 
         videoClips.sort((a, b) -> {
             int layerCompare = -Integer.compare(getTrackLayer(a), getTrackLayer(b));
@@ -159,8 +158,8 @@ public class SegmentRenderer {
             return Double.compare(a.getStartTime(), b.getStartTime());
         });
 
-        int previewWidth = getWidth() / 2;
-        int previewHeight = getHeight() / 2;
+        int previewWidth = (int) (getWidth() * qualityFactor);
+        int previewHeight = (int) (getHeight() * qualityFactor);
 
         String currentVideoLabel;
         int labelCounter = 0;
