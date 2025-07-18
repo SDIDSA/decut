@@ -1,6 +1,8 @@
 package org.luke.decut.render;
 
 import org.luke.decut.app.home.Home;
+import org.luke.decut.app.lib.assets.data.AssetData;
+import org.luke.decut.app.lib.assets.data.SubVideoAssetData;
 import org.luke.decut.app.timeline.clips.AudioClip;
 import org.luke.decut.app.timeline.clips.TimelineClip;
 import org.luke.decut.app.timeline.clips.VideoClip;
@@ -76,7 +78,11 @@ public class TimelineRenderer {
 
         Set<File> inputFiles = new HashSet<>();
         for (VideoClip clip : videoClips) {
-            inputFiles.add(clip.getSourceAsset().getFile());
+            if(clip.getSourceAsset() instanceof SubVideoAssetData subVid) {
+                inputFiles.add(subVid.getParent().getFile());
+            } else {
+                inputFiles.add(clip.getSourceAsset().getFile());
+            }
         }
         for (AudioClip clip : audioClips) {
             inputFiles.add(clip.getSourceAsset().getFile());
@@ -136,7 +142,11 @@ public class TimelineRenderer {
         currentVideoLabel = baseVideoLabel;
 
         for (VideoClip clip : videoClips) {
-            int inputIdx = fileToInputIndex.get(clip.getSourceAsset().getFile());
+            AssetData asset = clip.getSourceAsset();
+            if(asset instanceof SubVideoAssetData subVid) {
+                asset = subVid.getParent();
+            }
+            int inputIdx = fileToInputIndex.get(asset.getFile());
             String clipLabel = "[clip_" + labelCounter + "]";
             String scaledLabel = "[scaled_" + labelCounter + "]";
             String overlayLabel = "[overlay_" + labelCounter + "]";

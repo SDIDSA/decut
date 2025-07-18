@@ -7,7 +7,6 @@ import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.bitrate.AudioBitrate;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.filter_complex.audio.APad;
-import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.options.Seek;
 import org.luke.decut.ffmpeg.options.Skip;
 import org.luke.decut.ffmpeg.options.VFrames;
@@ -114,7 +113,7 @@ public class VideoAssetData extends AssetData {
 //                    .addOption(new FfmpegOption("s").setValue("1280x720"))
 //                    .addOption(new FfmpegOption("r").setValue("30"))
 //                    .addOption(new FfmpegOption("b:v").setValue("60M"))
-                    .setCodec(VideoCodec.H264)
+                    .setCodec(VideoCodec.HEVC_NVENC)
                     .setPreset(Preset.ULTRAFAST)
                     .setOnOutput(file -> {
                         video = SubVideoAssetData.getData(file, this);
