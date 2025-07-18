@@ -17,7 +17,7 @@ import java.util.ArrayList;
  *     .addFilter(new CropFilter(640, 480));
  * </pre>
  */
-public class FilterChain implements CommandPart {
+public class FilterChain {
     public ArrayList<Filter> filters;
 
     /**
@@ -45,7 +45,6 @@ public class FilterChain implements CommandPart {
      *
      * @return the FFmpeg filter chain syntax string
      */
-    @Override
     public String apply(FfmpegCommand command) {
         return String.join(",",
                 filters.stream().map(f -> f.apply(command)).toList().toArray(new String[0]));

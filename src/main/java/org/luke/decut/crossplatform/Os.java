@@ -33,7 +33,6 @@ public enum Os {
         String[] res = new String[command.length + commandPrefix.length];
 
         System.arraycopy(commandPrefix, 0, res, 0, commandPrefix.length);
-
         System.arraycopy(command, 0, res, commandPrefix.length, command.length);
 
         return res;

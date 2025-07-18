@@ -7,7 +7,6 @@ import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.bitrate.AudioBitrate;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.filter_complex.audio.APad;
-import org.luke.decut.ffmpeg.filter_complex.video.Scale;
 import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.options.Seek;
 import org.luke.decut.ffmpeg.options.Skip;
@@ -63,8 +62,9 @@ public class VideoAssetData extends AssetData {
         if (parent) {
             FfprobeCommand durCom = new FfprobeCommand()
                     .onOutput(str -> {
+                        System.out.println(str);
                         duration = (long) (Double.parseDouble(str) * 1000);
-                    })
+                    }).onError(System.err::println)
                     .addArgument("-v")
                     .addArgument("error")
                     .addArgument("-show_entries")
@@ -91,6 +91,8 @@ public class VideoAssetData extends AssetData {
 
             makeThumbs.waitFor();
             durCom.waitFor();
+            System.out.println(duration);
+            System.out.println(durCom.getExitCode());
             if (durCom.getExitCode() != 0) {
                 fetch(true);
                 return;

@@ -19,7 +19,7 @@ import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.threading.Platform;
 
 public class Command {
-    private final String[] command;
+    private String[] command;
 
     private OutputStreamWriter input;
 
@@ -33,7 +33,7 @@ public class Command {
     private AtomicBoolean streamClosed;
 
     public Command(Consumer<String> inputHandler, Consumer<String> errorHandler, String... command) {
-        this.command = Os.fromSystem().addCommandPrefix(command);
+        this.command = command;
         this.inputHandlers = new ArrayList<>();
         this.errorHandlers = new ArrayList<>();
         this.onExit = new ArrayList<>();
@@ -44,6 +44,10 @@ public class Command {
             inputHandlers.add(inputHandler);
         if (errorHandler != null)
             errorHandlers.add(errorHandler);
+    }
+
+    public void terminalCommand() {
+        this.command = Os.fromSystem().addCommandPrefix(command);
     }
 
     public void setUrlDecode(boolean urlDecode) {
@@ -83,14 +87,15 @@ public class Command {
         return this;
     }
 
-    public Process execute(File root) {
+    public Process execute() {
         if(urlDecode) {
             for (int i = 0; i < command.length; i++) {
                 command[i] = URLDecoder.decode(command[i], Charset.defaultCharset());
             }
         }
+        System.out.println(String.join(" ", command));
         try {
-            Process process = new ProcessBuilder(command).directory(root).start();
+            Process process = new ProcessBuilder(command).start();
 
             input = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
 
@@ -114,8 +119,8 @@ public class Command {
         }
     }
 
-    public void executeAndJoin(File root) {
-        Process process = execute(root);
+    public void executeAndJoin() {
+        Process process = execute();
         ArrayList<Consumer<Integer>> onExits = new ArrayList<>(onExit);
         onExit.clear();
         try {

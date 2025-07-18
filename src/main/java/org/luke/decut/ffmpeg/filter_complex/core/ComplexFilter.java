@@ -19,7 +19,7 @@ import java.util.List;
  *     .addOption(new FilterOption("height", "720"));
  * </pre>
  */
-public abstract class ComplexFilter implements CommandPart {
+public abstract class ComplexFilter {
     private final String name;
     private final FilterOption enable;
     private final ArrayList<FilterOption> options;
@@ -73,7 +73,6 @@ public abstract class ComplexFilter implements CommandPart {
      *
      * @return the FFmpeg filter syntax string
      */
-    @Override
     public String apply(FfmpegCommand command) {
         List<String> filtered = options.stream().filter(FilterOption::isChanged).map(fo -> fo.apply(command)).toList();
         return name.concat(filtered.isEmpty() ? "" : "=").concat(options.isEmpty() ? "" :

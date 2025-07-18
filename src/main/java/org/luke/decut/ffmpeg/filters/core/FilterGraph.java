@@ -5,6 +5,7 @@ import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.core.StreamType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -20,8 +21,8 @@ import java.util.stream.Collectors;
  * </pre>
  */
 public class FilterGraph implements CommandPart {
-    private StreamType type;
-    private ArrayList<FilterChain> chains;
+    private final StreamType type;
+    private final ArrayList<FilterChain> chains;
 
     /**
      * Creates a new filter graph for the specified stream type.
@@ -76,9 +77,8 @@ public class FilterGraph implements CommandPart {
     }
 
     @Override
-    public String apply(FfmpegCommand command) {
-        return "-filter:".concat(type.apply(command)).concat(
-                chains.stream().map(fc -> fc.apply(command)).collect(Collectors.joining(";", " ", ""))
-        );
+    public List<String> apply(FfmpegCommand command) {
+        return List.of("-filter:".concat(type.apply(command)),
+                chains.stream().map(fc -> fc.apply(command)).collect(Collectors.joining(";", " ", "")));
     }
 }

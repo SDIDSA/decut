@@ -4,6 +4,7 @@ import org.luke.decut.ffmpeg.options.FfmpegOption;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FfmpegInput implements CommandPart {
@@ -24,9 +25,11 @@ public class FfmpegInput implements CommandPart {
 
 
     @Override
-    public String apply(FfmpegCommand command) {
-        return (options.isEmpty() ? "" :
-                options.stream().map(fo -> fo.apply(command))
-                        .collect(Collectors.joining(" ", "", " "))).concat("-i \"" + source + "\"");
+    public List<String> apply(FfmpegCommand command) {
+        ArrayList<String> out = new ArrayList<>();
+        options.forEach(option -> out.addAll(option.apply(command)));
+        out.add("-i");
+        out.add(source.getAbsolutePath());
+        return out;
     }
 }

@@ -4,7 +4,6 @@ import org.luke.decut.cmd.Command;
 import org.luke.decut.local.LocalStore;
 import org.luke.decut.local.managers.FfprobeManager;
 import org.luke.decut.local.managers.LocalInstall;
-import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.threading.Platform;
 
 import java.io.File;
@@ -76,8 +75,8 @@ public class FfprobeCommand {
         command.add("-i");
         command.add("\"" + input.getAbsolutePath() + "\"");
 
-        Command com = new Command(onOutput, onError, String.join(" ", command));
-        running = com.execute(new File("/"));
+        Command com = new Command(onOutput, onError, command.toArray(new String[0]));
+        running = com.execute();
         return this;
     }
 
@@ -86,11 +85,13 @@ public class FfprobeCommand {
     }
 
     public FfprobeCommand waitFor() {
-        Platform.waitWhile(() -> running == null, 5000);
+        Platform.waitWhile(() -> running == null, 10000);
         if(running == null) {
-            ErrorHandler.handle(new RuntimeException("ffmpeg ffprobe failed to start"), "start ffprobe command");
+            System.out.println(getFfprobeBinary() + " " + String.join(" ", args) + " -i " + input);
+            System.out.println("\texecution failed, retrying...");
+            return execute().waitFor();
         }
-        if (running != null && running.isAlive()) {
+        if (running.isAlive()) {
             try {
                 running.waitFor();
             } catch (InterruptedException e) {

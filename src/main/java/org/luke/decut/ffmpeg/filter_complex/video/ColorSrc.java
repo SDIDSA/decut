@@ -3,6 +3,8 @@ package org.luke.decut.ffmpeg.filter_complex.video;
 import org.luke.decut.ffmpeg.filter_complex.core.ComplexFilter;
 import org.luke.decut.ffmpeg.filters.core.FilterOption;
 
+import static org.luke.decut.ffmpeg.CommandPart.DECIMAL;
+
 public class ColorSrc extends ComplexFilter {
     private final FilterOption color;
     private final FilterOption size;

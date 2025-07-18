@@ -117,7 +117,7 @@ public class Preview extends VBox implements Styleable {
         segments.keySet().forEach(index -> {
             FfmpegCommand imgCom = owner.previewFrames(out, index * SEG_SIZE, SEG_SIZE);
             FfmpegCommand audioCom = owner.previewAudio(out, index * SEG_SIZE, SEG_SIZE);
-            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg") + audioCom.setOutput(out).apply(audioCom, "ffmpeg");
+            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg").toString() + audioCom.setOutput(out).apply(audioCom, "ffmpeg").toString();
             if(segments.get(index) != null && !segments.get(index).getCommand().equals(com)) {
                 toRemove.add(index);
             }
@@ -132,7 +132,7 @@ public class Preview extends VBox implements Styleable {
         if (currentSequence != null) {
             FfmpegCommand imgCom = owner.previewFrames(out, currentSegment * SEG_SIZE, SEG_SIZE);
             FfmpegCommand audioCom = owner.previewAudio(out, currentSegment * SEG_SIZE, SEG_SIZE);
-            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg") + audioCom.setOutput(out).apply(audioCom, "ffmpeg");
+            String com = imgCom.setOutput(out).apply(imgCom, "ffmpeg").toString() + audioCom.setOutput(out).apply(audioCom, "ffmpeg").toString();
             if(!currentSequence.getCommand().equals(com)) {
                 currentSequence = null;
                 double at = owner.atProperty().get();
@@ -279,7 +279,7 @@ public class Preview extends VBox implements Styleable {
                 byte[] audioData = audioStream.readAllBytes();
                 audioStream.close();
 
-                String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom, "ffmpeg") + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom, "ffmpeg");
+                String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom, "ffmpeg").toString() + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom, "ffmpeg").toString();
                 FrameSequence sequence = new FrameSequence(com, frames, audioData, audioStream,
                         owner.framerateProperty().get(), tempDir);
 

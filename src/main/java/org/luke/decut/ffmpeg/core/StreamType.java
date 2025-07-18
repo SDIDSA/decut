@@ -3,7 +3,7 @@ package org.luke.decut.ffmpeg.core;
 import org.luke.decut.ffmpeg.CommandPart;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 
-public enum StreamType implements CommandPart {
+public enum StreamType {
     AUDIO("a"),
     VIDEO("v");
 
@@ -17,7 +17,6 @@ public enum StreamType implements CommandPart {
         return val;
     }
 
-    @Override
     public String apply(FfmpegCommand command) {
         return val;
     }

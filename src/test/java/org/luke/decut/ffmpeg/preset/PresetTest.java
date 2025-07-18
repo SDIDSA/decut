@@ -92,14 +92,13 @@ class PresetTest {
 
     @Test
     void testApplyForCodec() {
-        assertEquals("-preset medium", Preset.MEDIUM.applyForCodec("libx264"));
-        assertEquals("-preset fast", Preset.VERYFAST.applyForCodec("h264_nvenc"));
-        assertEquals("-preset slow", Preset.MEDIUM.applyForCodec("h264_qsv"));
-        assertEquals("-preset speed", Preset.ULTRAFAST.applyForCodec("h264_amf"));
+        assertEquals("medium", Preset.MEDIUM.applyForCodec("libx264").get(1));
+        assertEquals("fast", Preset.VERYFAST.applyForCodec("h264_nvenc").get(1));
+        assertEquals("slow", Preset.MEDIUM.applyForCodec("h264_qsv").get(1));
+        assertEquals("speed", Preset.ULTRAFAST.applyForCodec("h264_amf").get(1));
 
-        assertEquals("", Preset.MEDIUM.applyForCodec("unknown_codec"));
-
-        assertEquals("", Preset.MEDIUM.applyForCodec("h264_nvenc"));
+        assertTrue(Preset.MEDIUM.applyForCodec("unknown_codec").isEmpty());
+        assertTrue(Preset.MEDIUM.applyForCodec("h264_nvenc").isEmpty());
     }
 
     @ParameterizedTest
@@ -109,8 +108,8 @@ class PresetTest {
         assertNotNull(x264Result);
         assertFalse(x264Result.isEmpty());
 
-        String applied = preset.applyForCodec("libx264");
-        assertEquals("-preset " + x264Result, applied);
+        String applied = preset.applyForCodec("libx264").get(1);
+        assertEquals(x264Result, applied);
 
         assertDoesNotThrow(() -> {
             preset.getValueForCodec("h264_nvenc");

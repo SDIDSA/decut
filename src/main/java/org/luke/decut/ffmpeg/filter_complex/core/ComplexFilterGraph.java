@@ -94,16 +94,16 @@ public class ComplexFilterGraph implements CommandPart {
      * @return the FFmpeg filter_complex command string
      */
     @Override
-    public String apply(FfmpegCommand command) {
+    public List<String> apply(FfmpegCommand command) {
         if (nodes.isEmpty()) {
-            return "";
+            return List.of();
         }
 
         String filterString = nodes.stream()
                 .map(cfn -> cfn.apply(command))
                 .collect(Collectors.joining(";"));
 
-        return "-filter_complex \"" + filterString + "\"";
+        return List.of("-filter_complex", filterString);
     }
 
     /**

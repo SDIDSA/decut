@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *     .setOutput("[result]");
  * </pre>
  */
-public class ComplexFilterNode implements CommandPart {
+public class ComplexFilterNode {
     private final List<String> inputs;
     private final List<ComplexFilter> filters;
     private final List<String> outputs;
@@ -132,24 +132,20 @@ public class ComplexFilterNode implements CommandPart {
      * 
      * @return the FFmpeg filter node syntax string
      */
-    @Override
     public String apply(FfmpegCommand command) {
         StringBuilder sb = new StringBuilder();
-        
-        // Add inputs
+
         if (!inputs.isEmpty()) {
             sb.append(String.join("", inputs));
         }
-        
-        // Add filters
+
         if (!filters.isEmpty()) {
             String filterChain = filters.stream()
                 .map(cf -> cf.apply(command))
                 .collect(Collectors.joining(","));
             sb.append(filterChain);
         }
-        
-        // Add outputs
+
         if (!outputs.isEmpty()) {
             sb.append(String.join("", outputs));
         }

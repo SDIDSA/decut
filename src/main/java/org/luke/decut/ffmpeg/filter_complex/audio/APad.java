@@ -3,6 +3,8 @@ package org.luke.decut.ffmpeg.filter_complex.audio;
 import org.luke.decut.ffmpeg.filter_complex.core.ComplexFilter;
 import org.luke.decut.ffmpeg.filters.core.FilterOption;
 
+import static org.luke.decut.ffmpeg.CommandPart.DECIMAL;
+
 public class APad extends ComplexFilter {
     private final FilterOption packet_size;
     private final FilterOption pad_len;

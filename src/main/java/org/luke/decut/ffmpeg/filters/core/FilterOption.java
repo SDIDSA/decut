@@ -1,6 +1,5 @@
 package org.luke.decut.ffmpeg.filters.core;
 
-import org.luke.decut.ffmpeg.CommandPart;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 
 /**
@@ -12,7 +11,7 @@ import org.luke.decut.ffmpeg.FfmpegCommand;
  * FilterOption option = new FilterOption("width", "1280");
  * </pre>
  */
-public class FilterOption implements CommandPart {
+public class FilterOption {
     private final String name;
     private String value;
     private boolean changed;
@@ -65,7 +64,6 @@ public class FilterOption implements CommandPart {
      *
      * @return the FFmpeg option syntax string
      */
-    @Override
     public String apply(FfmpegCommand command) {
         return name.concat("=").concat(value);
     }

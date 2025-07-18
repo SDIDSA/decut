@@ -163,10 +163,7 @@ public class FfprobeManager {
 	}
 
 	public static LocalInstall versionOf(String path) {
-		if(!versionCache.containsKey(path)) {
-			versionCache.put(path, versionFromDir(new File(path)));
-		}
-		return versionCache.get(path);
+		return versionCache.computeIfAbsent(path, (p) -> versionFromDir(new File(p)));
 	}
 
 	public static LocalInstall versionFromDir(File file) {
@@ -183,7 +180,7 @@ public class FfprobeManager {
 				if(!Os.fromSystem().isWindows() && !sf.canExecute()) {
                     try {
                         new Command("chmod a+x \"" + sf.getAbsolutePath() + "\"")
-                                .execute(file).waitFor();
+                                .execute().waitFor();
                     } catch (InterruptedException e) {
                         ErrorHandler.handle(e, "enabling the execution of the ffprobe binary");
                     }
@@ -221,7 +218,7 @@ public class FfprobeManager {
         new Command(ffprobeBinary, "-version")
                 .addErrorHandler(parser)
                 .addInputHandler(parser)
-                .executeAndJoin(new File("/"));
+                .executeAndJoin();
         if(versionRef.get() != null) {
             return versionRef.get();
         }

@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class FfmpegCommand implements CommandPart {
@@ -88,36 +89,17 @@ public class FfmpegCommand implements CommandPart {
     }
 
     private FfmpegCommand execute(String ffmpegBinary) {
-        String comStr = apply(this, ffmpegBinary);
-        if (comStr.length() > 8191 && Os.fromSystem().isWindows()) {
-            try {
-                File bat = File.createTempFile("decut_com_", ".bat");
-                FileDealer.write(comStr, bat);
-                Command com = new Command(this::handleLine, this::handleLine, bat.getAbsolutePath()).addOnExit(_ -> {
-                    if (output != null && output.exists() && output.length() > 0) {
-                        if (onOutput != null) {
-                            onOutput.accept(output);
-                        }
-                        outputHandled = true;
-                    }
-                });
-                runningCom = com;
-                running = com.execute(new File("/"));
-            } catch (IOException e) {
-                ErrorHandler.handle(e, "executing ffmpeg command");
-            }
-        } else {
-            Command com = new Command(this::handleLine, this::handleLine, comStr).addOnExit(_ -> {
-                if (output != null && output.exists() && output.length() > 0) {
-                    if (onOutput != null) {
-                        onOutput.accept(output);
-                    }
-                    outputHandled = true;
+        List<String> comStr = apply(this, ffmpegBinary);
+        Command com = new Command(this::handleLine, this::handleLine, comStr.toArray(new String[0])).addOnExit(_ -> {
+            if (output != null && output.exists() && output.length() > 0) {
+                if (onOutput != null) {
+                    onOutput.accept(output);
                 }
-            });
-            runningCom = com;
-            running = com.execute(new File("/"));
-        }
+                outputHandled = true;
+            }
+        });
+        runningCom = com;
+        running = com.execute();
 
         return this;
     }
@@ -296,33 +278,50 @@ public class FfmpegCommand implements CommandPart {
         return this;
     }
 
-    public String apply(FfmpegCommand command, String ffmpegBinary) {
-        ArrayList<CommandPart> parts = new ArrayList<>();
+    public List<String> apply(FfmpegCommand command, String ffmpegBinary) {
+        ArrayList<String> outParts = new ArrayList<>();
 
-        StringBuilder commandBuilder = new StringBuilder(ffmpegBinary)
-                .append(progress ? " -progress pipe:1" : "")
-                .append(" -y");
+        outParts.add(ffmpegBinary);
+        if(progress) {
+            outParts.add("-progress");
+            outParts.add("pipe:1");
+        }
+        outParts.add("-y");
 
-        parts.addAll(inputs);
-        parts.addAll(graphs);
-        if (!complexFilterGraph.isEmpty()) parts.add(complexFilterGraph);
-        if (preset != null) parts.add(preset);
-        parts.addAll(codecs);
-        parts.addAll(bitrates);
-        parts.addAll(options);
-
-        for (CommandPart part : parts) {
-            commandBuilder.append(" ").append(part.apply(command));
+        for (FfmpegInput input : inputs) {
+            outParts.addAll(input.apply(command));
         }
 
-        if (output != null) {
-            commandBuilder.append(" ").append(output.getAbsolutePath());
+        for (FilterGraph graph : graphs) {
+            outParts.addAll(graph.apply(command));
         }
-        return commandBuilder.toString().trim();
+
+        outParts.addAll(complexFilterGraph.apply(command));
+        if(preset != null) {
+            outParts.addAll(preset.apply(command));
+        }
+
+        for (Codec codec : codecs) {
+            outParts.addAll(codec.apply(command));
+        }
+
+        for (Bitrate bitrate : bitrates) {
+            outParts.addAll(bitrate.apply(command));
+        }
+
+        for (FfmpegOption option : options) {
+            outParts.addAll(option.apply(command));
+        }
+
+        if(output != null) {
+            outParts.add(output.getAbsolutePath());
+        }
+
+        return outParts;
     }
 
     @Override
-    public String apply(FfmpegCommand command) {
+    public List<String> apply(FfmpegCommand command) {
         return apply(command, getFfmpegBinary());
     }
 }

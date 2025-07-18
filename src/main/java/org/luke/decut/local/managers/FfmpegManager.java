@@ -180,7 +180,7 @@ public class FfmpegManager {
     }
 
     public static LocalInstall versionOf(String path) {
-        return versionCache.get(path);
+        return versionCache.computeIfAbsent(path, (p) -> versionFromDir(new File(p)));
     }
 
     public static LocalInstall versionFromDir(File file) {
@@ -197,7 +197,7 @@ public class FfmpegManager {
                 if (!Os.fromSystem().isWindows() && !sf.canExecute()) {
                     try {
                         new Command("chmod a+x \"" + sf.getAbsolutePath() + "\"")
-                                .execute(file).waitFor();
+                                .execute().waitFor();
                     } catch (InterruptedException e) {
                         ErrorHandler.handle(e, "enabling the execution of the ffmpeg binary");
                     }
@@ -235,7 +235,7 @@ public class FfmpegManager {
         Command com = new Command(ffmpegBinary, "-version")
                 .addErrorHandler(parser)
                 .addInputHandler(parser);
-        com.executeAndJoin(new File("/"));
+        com.executeAndJoin();
         if (versionRef.get() != null) {
             return versionRef.get();
         }

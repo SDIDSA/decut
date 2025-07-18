@@ -3,6 +3,8 @@ package org.luke.decut.ffmpeg.filter_complex.audio;
 import org.luke.decut.ffmpeg.filter_complex.core.ComplexFilter;
 import org.luke.decut.ffmpeg.filters.core.FilterOption;
 
+import static org.luke.decut.ffmpeg.CommandPart.DECIMAL;
+
 public class Volume extends ComplexFilter {
     private final FilterOption volume;
     private final FilterOption precision;

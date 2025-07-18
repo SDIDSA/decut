@@ -4,6 +4,8 @@ import org.luke.decut.ffmpeg.CommandPart;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 
+import java.util.List;
+
 public enum Preset implements CommandPart {
     ULTRAFAST("ultrafast"),
     SUPERFAST("superfast"),
@@ -66,14 +68,14 @@ public enum Preset implements CommandPart {
         };
     }
 
-    public String applyForCodec(String codec) {
+    public List<String> applyForCodec(String codec) {
         String mapped = getValueForCodec(codec);
-        return mapped == null ? "" : "-preset " + mapped;
+        return mapped == null ? List.of() : List.of("-preset", mapped);
     }
 
     @Override
-    public String apply(FfmpegCommand command) {
+    public List<String> apply(FfmpegCommand command) {
         VideoCodec codec = command.getVideoCodec();
-        return codec == null ? "" : applyForCodec(codec.getCodecName());
+        return codec == null ? List.of() : applyForCodec(codec.getCodecName());
     }
 }

@@ -5,6 +5,8 @@ import org.luke.decut.ffmpeg.CommandPart;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.core.StreamType;
 
+import java.util.List;
+
 public class Bitrate implements CommandPart {
     private final StreamType type;
     private final String bitrate;
@@ -19,7 +21,7 @@ public class Bitrate implements CommandPart {
     }
 
     @Override
-    public String apply(FfmpegCommand command) {
-        return "-b:" + type.apply(command) + " " + bitrate;
+    public List<String> apply(FfmpegCommand command) {
+        return List.of("-b:" + type.apply(command), bitrate);
     }
 }

@@ -23,14 +23,16 @@ class CommandTest {
         String expectedOutcome = os.name();
         Command command;
         if(os.isWindows()) {
-            command = new Command("echo " + expectedOutcome);
+            command = new Command("echo", expectedOutcome);
         } else if(os.isLinux()) {
-            command = new Command("echo '" + expectedOutcome + "'");
+            command = new Command("echo", expectedOutcome);
         } else if(os.isOsx()) {
-            command = new Command("echo '" + expectedOutcome + "'");
+            command = new Command("echo", expectedOutcome);
         } else {
-            command = new Command("echo '" + expectedOutcome + "'");
+            command = new Command("echo", expectedOutcome);
         }
+
+        command.terminalCommand();
 
         StringBuilder stdOut = new StringBuilder();
         StringBuilder errOut = new StringBuilder();
@@ -39,7 +41,7 @@ class CommandTest {
                 .addInputHandler(stdOut::append)
                 .addErrorHandler(errOut::append)
                 .addOnExit(exitCode::set)
-                .executeAndJoin(new File("/"));
+                .executeAndJoin();
 
         assertEquals(expectedOutcome, stdOut.toString().trim());
         assertEquals("", errOut.toString().trim());
@@ -54,16 +56,18 @@ class CommandTest {
 
         Command errorCommand;
         if(os.isWindows()) {
-            errorCommand = new Command("type nonexistent_file.txt");
+            errorCommand = new Command("type" , "nonexistent_file.txt");
         } else {
             errorCommand = new Command("ls /nonexistent_directory_12345");
         }
+
+        errorCommand.terminalCommand();
 
         errorCommand
                 .addInputHandler(stdOut::append)
                 .addErrorHandler(errOut::append)
                 .addOnExit(exitCode::set)
-                .executeAndJoin(new File("/"));
+                .executeAndJoin();
 
         assertEquals("", stdOut.toString().trim());
         assertFalse(errOut.toString().trim().isEmpty());
