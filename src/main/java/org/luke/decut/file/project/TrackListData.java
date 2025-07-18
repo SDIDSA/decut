@@ -7,12 +7,10 @@ import org.luke.decut.app.lib.assets.data.VideoAssetData;
 import org.luke.decut.app.lib.assets.filter.AssetType;
 import org.luke.decut.app.timeline.clips.TimelineClip;
 import org.luke.decut.app.timeline.tracks.Track;
-import org.luke.gui.threading.Platform;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public class TrackListData extends ArrayList<TrackData> implements ProjectPart {

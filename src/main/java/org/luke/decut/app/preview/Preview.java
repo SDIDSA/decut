@@ -57,8 +57,30 @@ public class Preview extends VBox implements Styleable {
         loadingSegments = new HashMap<>();
 
         view = new ImageView();
-        view.setPreserveRatio(true);
-        view.setSmooth(true);
+
+        Runnable scaler = () -> {
+            double pw = getWidth();
+            double ph = getHeight();
+
+            double sw = owner.canvasWidthProperty().get();
+            double sh = owner.canvasHeightProperty().get();
+
+            double scaleX = pw / sw;
+            double scaleY = ph / sh;
+
+            double scale = Math.min(scaleX, scaleY);
+
+            double finalWidth = sw * scale;
+            double finalHeight = sh * scale;
+
+            view.setFitWidth(finalWidth);
+            view.setFitHeight(finalHeight);
+        };
+
+        widthProperty().addListener((_, _, _) -> scaler.run());
+        heightProperty().addListener((_, _, _) -> scaler.run());
+        owner.canvasWidthProperty().addListener((_, _, _) -> scaler.run());
+        owner.canvasHeightProperty().addListener((_, _, _) -> scaler.run());
 
         getChildren().add(view);
 
