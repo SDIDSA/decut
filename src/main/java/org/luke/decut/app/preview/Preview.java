@@ -256,14 +256,12 @@ public class Preview extends VBox implements Styleable {
                 File tempDir = Files.createTempDirectory("decut_prev_" + index).toFile();
                 FfmpegCommand imageCom = owner.previewFrames(tempDir, start, SEG_SIZE);
                 imageCom.execute();
-                imageCom.waitFor();
 
                 File audioFile = new File(tempDir, "audio_" + index + ".wav");
                 FfmpegCommand audioCom = owner.previewAudio(audioFile, start, SEG_SIZE);
                 audioCom.execute();
 
-                audioCom.waitFor();
-
+                imageCom.waitFor();
 
                 File[] imageFiles = tempDir.listFiles((dir, name) -> name.matches("frame_\\d{6}\\.bmp"));
                 if (imageFiles == null || imageFiles.length == 0) {
@@ -275,6 +273,7 @@ public class Preview extends VBox implements Styleable {
                     frames.add(new Image(imageFile.toURI().toString(), true));
                 });
 
+                audioCom.waitFor();
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
                 byte[] audioData = audioStream.readAllBytes();
                 audioStream.close();

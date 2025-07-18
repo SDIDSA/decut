@@ -81,6 +81,10 @@ public class Decut extends Application {
 	public void openFfmpegConfig() {
 		openSettings("ffmpeg_versions");
 	}
+
+	public void openFfprobeConfig() {
+		openSettings("ffprobe_versions");
+	}
 	
 	public Home getHome() {
 		return home;

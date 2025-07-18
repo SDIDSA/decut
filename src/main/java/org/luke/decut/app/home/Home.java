@@ -157,7 +157,7 @@ public class Home extends Page {
         applyStyle(window.getStyl());
     }
 
-    public void perform(String name, Runnable action, Runnable inverse, boolean ffmpeg) {
+    public void perform(String name, Runnable action, Runnable inverse, boolean ffmpeg, boolean ffprobe) {
         edit.perform(name, () -> {
             action.run();
             pausePlayback();
@@ -166,11 +166,11 @@ public class Home extends Page {
             inverse.run();
             pausePlayback();
             clearPreviewCache();
-        }, ffmpeg);
+        }, ffmpeg, ffprobe);
     }
 
     public void perform(String name, Runnable action, Runnable inverse) {
-        perform(name, action, inverse, false);
+        perform(name, action, inverse, false, false);
     }
 
     public FfmpegCommand render(File file) {

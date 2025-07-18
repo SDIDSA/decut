@@ -202,7 +202,7 @@ public class AssetsDisplay extends StackPane {
             refreshDisplay();
         };
 
-        owner.perform("import assets", action, undo, true);
+        owner.perform("import assets", action, undo, true, true);
     }
 
     public ObservableList<AssetData> getData() {

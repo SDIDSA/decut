@@ -93,7 +93,6 @@ public class Command {
                 command[i] = URLDecoder.decode(command[i], Charset.defaultCharset());
             }
         }
-        System.out.println(String.join(" ", command));
         try {
             Process process = new ProcessBuilder(command).start();
 
@@ -124,6 +123,7 @@ public class Command {
         ArrayList<Consumer<Integer>> onExits = new ArrayList<>(onExit);
         onExit.clear();
         try {
+            if(process == null) return;
             int exitCode = process.waitFor();
             Platform.waitWhile(() -> !streamClosed.get());
             onExits.forEach(oe -> oe.accept(exitCode));

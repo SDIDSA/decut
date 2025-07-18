@@ -36,11 +36,11 @@ public class EditMenu extends HomeMenuButton {
         separate();
     }
 
-    public void perform(String name, Runnable action, Runnable inverse, boolean ffmpeg) {
-        history.executeAndRecord(new DecutAction(name, action, inverse, ffmpeg));
+    public void perform(String name, Runnable action, Runnable inverse, boolean ffmpeg, boolean ffprobe) {
+        history.executeAndRecord(new DecutAction(name, action, inverse, ffmpeg, ffprobe));
     }
 
     public void perform(String name, Runnable action, Runnable inverse) {
-        perform(name, action, inverse, false);
+        perform(name, action, inverse, false, false);
     }
 }

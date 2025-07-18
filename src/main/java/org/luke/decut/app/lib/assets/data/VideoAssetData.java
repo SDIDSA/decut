@@ -62,9 +62,8 @@ public class VideoAssetData extends AssetData {
         if (parent) {
             FfprobeCommand durCom = new FfprobeCommand()
                     .onOutput(str -> {
-                        System.out.println(str);
                         duration = (long) (Double.parseDouble(str) * 1000);
-                    }).onError(System.err::println)
+                    })
                     .addArgument("-v")
                     .addArgument("error")
                     .addArgument("-show_entries")
@@ -91,8 +90,6 @@ public class VideoAssetData extends AssetData {
 
             makeThumbs.waitFor();
             durCom.waitFor();
-            System.out.println(duration);
-            System.out.println(durCom.getExitCode());
             if (durCom.getExitCode() != 0) {
                 fetch(true);
                 return;

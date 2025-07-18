@@ -64,6 +64,7 @@
 	"jdk_versions": "JDK versions",
 	"gradle_versions": "Gradle versions",
 	"ffmpeg_versions": "Ffmpeg versions",
+	"ffprobe_versions": "Ffprobe versions",
 	"text_preview": "Text preview",
 	"dark": "Dark",
 	"gray": "Gray",
