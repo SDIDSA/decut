@@ -2,6 +2,7 @@ package org.luke.decut.app.home.menubar;
 
 import javafx.stage.FileChooser;
 import org.luke.decut.app.home.Home;
+import org.luke.decut.crossplatform.Os;
 import org.luke.decut.ffmpeg.FfmpegCommand;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
 import org.luke.decut.file.FileDealer;
@@ -69,7 +70,7 @@ public class FileMenu extends HomeMenuButton {
             File saveTo = zfc.showSaveDialog(owner.getWindow());
             if(saveTo != null) {
                 try {
-                    File root = Files.createTempDirectory("decut_zip").toFile();
+                    File root = Os.fromSystem().createTempDirectory("zip_");
                     owner.zip(root);
                     File projFile = new File(root, "project.dcx");
                     FileDealer.write(owner.save().serialize(true).toString(), projFile);
@@ -83,7 +84,7 @@ public class FileMenu extends HomeMenuButton {
             File open = zfc.showOpenDialog(owner.getWindow());
             if(open != null) {
                 try {
-                    File root = Files.createTempDirectory("decut_zip").toFile();
+                    File root = Os.fromSystem().createTempDirectory("zip_");
                     ZipUtils.unzipWithProgress(open, root, p -> System.out.println("unzipping : " + p));
                     File proj = new File(root, "project.dcx");
                     owner.load(proj, true);

@@ -13,17 +13,13 @@ import org.luke.decut.ffmpeg.filters.core.FilterGraph;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
 import org.luke.decut.ffmpeg.options.FfmpegOption;
 import org.luke.decut.ffmpeg.preset.Preset;
-import org.luke.decut.file.FileDealer;
 import org.luke.decut.local.LocalStore;
 import org.luke.decut.local.managers.FfmpegManager;
 import org.luke.decut.local.managers.LocalInstall;
 import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.threading.Platform;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -259,7 +255,7 @@ public class FfmpegCommand implements CommandPart {
 
     public FfmpegCommand setOnOutput(Consumer<File> onOutput, String extension) {
         try {
-            setOutput(File.createTempFile("decut_", extension));
+            setOutput(Os.fromSystem().createTempFile("ffmpeg_", extension));
             this.onOutput = onOutput;
         } catch (IOException e) {
             ErrorHandler.handle(e, "set output handler");
@@ -268,19 +264,13 @@ public class FfmpegCommand implements CommandPart {
     }
 
     public FfmpegCommand setOnOutputStream(Consumer<InputStream> onOutput, String extension) {
-        try {
-            setOutput(File.createTempFile("decut_", extension));
-            this.onOutput = file -> {
-                try (InputStream fis = new FileInputStream(file)) {
-                    onOutput.accept(fis);
-                    //Files.delete(file.toPath());
-                } catch (IOException ex) {
-                    ErrorHandler.handle(ex, "handle ffmpeg output");
-                }
-            };
-        } catch (IOException e) {
-            ErrorHandler.handle(e, "set output handler");
-        }
+        setOnOutput(file -> {
+            try (InputStream is = new FileInputStream(file)){
+                onOutput.accept(is);
+            } catch (Exception e) {
+                ErrorHandler.handle(e, "handle ffmpeg output");
+            }
+        }, extension);
         return this;
     }
 

@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import org.luke.decut.crossplatform.Os;
 import org.luke.gui.controls.space.ExpandingHSpace;
 import org.luke.gui.exception.ErrorHandler;
 import org.luke.gui.factory.Backgrounds;
@@ -117,7 +118,7 @@ public class DownloadJob extends LocalInstallUi {
 	}
 
 	public void start() {
-		new Thread(() -> {
+		Thread downloader = new Thread(() -> {
 			try {
 				URL url = URI.create(urlString).toURL();
 				URLConnection con = url.openConnection();
@@ -127,7 +128,7 @@ public class DownloadJob extends LocalInstallUi {
 				String name = urlString.substring(urlString.lastIndexOf("/") + 1, ind == -1 ? urlString.length() : ind);
 				name = name.substring(0, name.lastIndexOf("."));
 
-				File output = File.createTempFile(name + "_", ".zip");
+				File output = Os.fromSystem().createTempFile("download_" + name + "_", ".zip");
 				OutputStream os = new FileOutputStream(output);
 
 				int fileLength = con.getContentLength();
@@ -166,7 +167,9 @@ public class DownloadJob extends LocalInstallUi {
 			} catch (IOException | InterruptedException e) {
 				ErrorHandler.handle(e, "download file " + urlString);
 			}
-		}, "download thread for " + urlString).start();
+		}, "download thread for " + urlString);
+		downloader.setDaemon(true);
+		downloader.start();
 	}
 
 }

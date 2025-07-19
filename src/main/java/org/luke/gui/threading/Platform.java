@@ -16,7 +16,11 @@ public class Platform {
     private static int threadIndex = 0;
     private static final Function<String, ThreadFactory> threadMaker =
             (name) ->
-                    (runnable) -> new Thread(runnable, name + "_" + threadIndex++);
+                    (runnable) -> {
+                        Thread t = new Thread(runnable, name + "_" + threadIndex++);
+                        t.setDaemon(true);
+                        return t;
+                    };
 
     private static final Function<String, ExecutorService> poolMaker =
             (name) -> Executors.newCachedThreadPool(threadMaker.apply(name));

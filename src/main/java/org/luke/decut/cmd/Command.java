@@ -1,7 +1,6 @@
 package org.luke.decut.cmd;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,7 +9,6 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -31,7 +29,7 @@ public class Command {
 
     private boolean urlDecode = false;
 
-    private AtomicBoolean streamClosed;
+    private final AtomicBoolean streamClosed;
 
     public Command(Consumer<String> inputHandler, Consumer<String> errorHandler, String... command) {
         this.command = command;

@@ -97,7 +97,11 @@ public class Preview extends VBox implements Styleable {
         clip.heightProperty().bind(heightProperty());
         setClip(clip);
 
-        executor = Executors.newFixedThreadPool(1);
+        executor = Executors.newFixedThreadPool(1, (r) -> {
+            Thread t = new Thread(r, "preview thread");
+            t.setDaemon(true);
+            return t;
+        });
 
         frameTimer = new AnimationTimer();
         initAudio();
@@ -283,8 +287,7 @@ public class Preview extends VBox implements Styleable {
         CompletableFuture<FrameSequence> future = CompletableFuture.supplyAsync(() -> {
             try {
                 double start = index * SEG_SIZE;
-                long diag = System.currentTimeMillis();
-                File tempDir = Files.createTempDirectory("decut_prev_" + index).toFile();
+                File tempDir = Os.fromSystem().createTempDirectory("preview_" + index + "_");
                 FfmpegCommand imageCom = owner.previewFrames(tempDir, start, SEG_SIZE, qualityFactor);
                 imageCom.execute();
 
@@ -308,8 +311,6 @@ public class Preview extends VBox implements Styleable {
                 AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
                 byte[] audioData = audioStream.readAllBytes();
                 audioStream.close();
-
-                System.out.println((System.currentTimeMillis() - diag) + " ms");
 
                 String com = imageCom.setOutput(Os.fromSystem().getDecutRoot()).apply(imageCom, "ffmpeg").toString() + audioCom.setOutput(Os.fromSystem().getDecutRoot()).apply(audioCom, "ffmpeg").toString();
                 FrameSequence sequence = new FrameSequence(com, frames, audioData, audioStream,

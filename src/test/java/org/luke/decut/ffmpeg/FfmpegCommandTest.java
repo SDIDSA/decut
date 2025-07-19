@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.luke.decut.crossplatform.Os;
 import org.luke.decut.ffmpeg.codec.VideoCodec;
 import org.luke.decut.ffmpeg.handlers.ProgressHandler;
 import org.luke.decut.ffmpeg.preset.Preset;
@@ -32,7 +33,7 @@ class FfmpegCommandTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        out = File.createTempFile("decut_test_", ".mp4");
+        out = Os.fromSystem().createTempFile("test_", ".mp4");
     }
 
     @AfterEach
