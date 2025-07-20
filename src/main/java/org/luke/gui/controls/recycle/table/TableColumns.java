@@ -201,10 +201,7 @@ public class TableColumns {
 
     // --- Helper Methods ---
 
-    /**
-     * Formats a byte count into a human-readable string (e.g., "1.2 KB", "5.0 MB").
-     */
-    private static String formatByteSize(long bytes) {
+    public static String formatByteSize(long bytes) {
         if (bytes < 1024) return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(1024));
         String pre = "KMGTPE".charAt(exp - 1) + "";

@@ -92,7 +92,7 @@ public class SectionItem extends StackPane implements Styleable {
 			}
 		});
 
-		Platform.runBack(() -> getContent(settings, contentClass));
+		//Platform.runBack(() -> getContent(settings, contentClass));
 	}
 
 	public SectionItem(Settings settings, String key, Runnable onAction) {

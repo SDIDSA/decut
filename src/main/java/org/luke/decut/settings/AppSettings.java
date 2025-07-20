@@ -1,7 +1,8 @@
 package org.luke.decut.settings;
 
-import org.luke.decut.settings.content.ffmpeg.FfmpegSettings;
-import org.luke.decut.settings.content.ffprobe.FfprobeSettings;
+import org.luke.decut.settings.content.performance.HardwareInfo;
+import org.luke.decut.settings.content.versionmanage.FfmpegSettings;
+import org.luke.decut.settings.content.versionmanage.FfprobeSettings;
 import org.luke.gui.window.Window;
 import org.luke.decut.settings.abs.Settings;
 import org.luke.decut.settings.abs.left.Section;
@@ -19,8 +20,13 @@ public class AppSettings extends Settings {
 		appSettings.addItem(new SectionItem(this, "ffmpeg_versions", FfmpegSettings.class));
 		appSettings.addItem(new SectionItem(this, "ffprobe_versions", FfprobeSettings.class));
 
+		Section performance = new Section(this, "Performance", true);
+		performance.addItem(new SectionItem(this, "Hardware info", HardwareInfo.class));
+		performance.addItem(new SectionItem(this, "Acceleration", DisplaySettings.class));
+
 		sideBar.addSection(appSettings);
 		sideBar.separate(win);
+		sideBar.addSection(performance);
 
 		fire("display");
 	}

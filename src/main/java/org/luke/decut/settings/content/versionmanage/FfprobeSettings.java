@@ -1,95 +1,95 @@
-package org.luke.decut.settings.content.ffmpeg;
+package org.luke.decut.settings.content.versionmanage;
 
 import javafx.scene.Node;
-import org.luke.decut.local.managers.FfmpegManager;
-import org.luke.decut.settings.abs.FfmpegVersionItem;
+import org.luke.decut.local.LocalStore;
+import org.luke.decut.local.managers.FfprobeManager;
+import org.luke.decut.local.managers.LocalInstall;
+import org.luke.decut.local.ui.DownloadJob;
+import org.luke.decut.settings.abs.FfprobeVersionItem;
 import org.luke.decut.settings.abs.LocalManagerSettings;
 import org.luke.decut.settings.abs.Settings;
 import org.luke.gui.controls.input.combo.ComboItem;
 import org.luke.gui.controls.popup.context.ContextMenu;
 import org.luke.gui.window.Window;
-import org.luke.decut.local.LocalStore;
-import org.luke.decut.local.managers.LocalInstall;
-import org.luke.decut.local.ui.DownloadJob;
 
 import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 
-public class FfmpegSettings extends LocalManagerSettings {
+public class FfprobeSettings extends LocalManagerSettings {
 
-	public FfmpegSettings(Settings settings) {
-		super(settings, "Ffmpeg");
+	public FfprobeSettings(Settings settings) {
+		super(settings, "Ffprobe");
 	}
 
 	@Override
 	public Comparator<String> comparator() {
-		return FfmpegManager.COMPARATOR;
+		return FfprobeManager.COMPARATOR;
 	}
 
 	@Override
 	public List<DownloadJob> downloadJobs() {
-		return FfmpegManager.downloadJobs();
+		return FfprobeManager.downloadJobs();
 	}
 
 	@Override
 	public Node managedUi(Window win, String version, Runnable refresh) {
-		return FfmpegManager.managedUi(win, version, refresh);
+		return FfprobeManager.managedUi(win, version, refresh);
 	}
 
 	@Override
 	public Node localUi(Window win, LocalInstall version, Runnable refresh) {
-		return FfmpegManager.localUi(win, version, refresh);
+		return FfprobeManager.localUi(win, version, refresh);
 	}
 
 	@Override
 	public List<File> managedInstalls() {
-		return FfmpegManager.managedInstalls();
+		return FfprobeManager.managedInstalls();
 	}
 
 	@Override
 	public List<LocalInstall> localInstalls() {
-		return FfmpegManager.localInstalls();
+		return FfprobeManager.localInstalls();
 	}
 
 	@Override
 	public List<String> installableVersions() {
-		return FfmpegManager.installableVersions();
+		return FfprobeManager.installableVersions();
 	}
 
 	@Override
 	public DownloadJob install(Window win, String version) {
-		return FfmpegManager.install(win, version);
+		return FfprobeManager.install(win, version);
 	}
 
 	@Override
 	public void setDefaultVersion(String version) {
-		LocalStore.setDefaultFfmpeg(version);
+		LocalStore.setDefaultFfprobe(version);
 	}
 
 	@Override
 	public String getDefaultVersion() {
-		return LocalStore.getDefaultFfmpeg();
+		return LocalStore.getDefaultFfprobe();
 	}
 
 	@Override
 	public boolean isValid(String version) {
-		return FfmpegManager.isValid(version);
+		return FfprobeManager.isValid(version);
 	}
 
 	@Override
 	public void addInst(File dir) {
-		FfmpegManager.addLocal(dir.getAbsolutePath());
+		FfprobeManager.addLocal(dir.getAbsolutePath());
 	}
 
 	@Override
 	public void clearDefault() {
-		LocalStore.setDefaultFfmpeg(null);
+		LocalStore.setDefaultFfprobe(null);
 		defCombo.setValue("");
 	}
 
 	@Override
 	public ComboItem createComboItem(ContextMenu men, String key) {
-		return new FfmpegVersionItem(men, key);
+		return new FfprobeVersionItem(men, key);
 	}
 }
