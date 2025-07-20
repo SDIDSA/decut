@@ -28,6 +28,7 @@ public class HardwareInfo extends SettingsContent {
 		HardwareAbstractionLayer hal = si.getHardware();
 
 		CentralProcessor cpu = hal.getProcessor();
+
 		String cpuVendor = cpu.getProcessorIdentifier().getVendor()
 				.toLowerCase()
 				.replace("genuineintel", "intel");
@@ -35,22 +36,12 @@ public class HardwareInfo extends SettingsContent {
 		GraphicsCard gpu = hal.getGraphicsCards().getFirst();
 		String gpuVendor = gpu.getVendor()
 				.toLowerCase();
-		if(gpuVendor.contains("vmware")) {
-			gpuVendor = "vmware";
-		}
+
 		OperatingSystem os = si.getOperatingSystem();
 
 		String osName = os.getFamily()
 				.toLowerCase()
 				.replace(" ", "-");
-
-//		if(osName.contains("linux")) {
-//			osName = "linux";
-//		}
-
-		System.out.println(cpuVendor);
-		System.out.println(gpuVendor);
-		System.out.println(osName);
 
 
 		VBox hardwareRoot = new VBox(10);
@@ -63,7 +54,7 @@ public class HardwareInfo extends SettingsContent {
 
 		VBox osRoot = new VBox(10);
 		System.out.println(os.getVersionInfo());
-		addLine(osRoot, "os-" + osName, "Operating system", os.getFamily() + " " + si.getOperatingSystem().getVersionInfo().getVersion());
+		addLine(osRoot, "os-" + osName, "Operating system", os.getFamily() + " " + os.getVersionInfo().getVersion());
 		addLine(osRoot, os.getBitness() + "-bit", "Architecture", os.getBitness() + "bit");
 		getChildren().add(osRoot);
 
@@ -76,7 +67,7 @@ public class HardwareInfo extends SettingsContent {
 	private void addLine(VBox root, String icon, String title, String value) {
 		HBox line = new HBox(10);
 		line.setAlignment(Pos.CENTER_LEFT);
-		ColoredIcon ic = new ColoredIcon(settings.getWindow(), icon, 18, Style::getTextMuted);
+		ColoredIcon ic = new ColoredIcon(settings.getWindow(), icon.split(" ")[0], 18, Style::getTextMuted);
 		ColoredLabel tit = new ColoredLabel(settings.getWindow(), title, Style::getTextMuted);
 		ColoredLabel val = new ColoredLabel(settings.getWindow(), value, Style::getTextNormal);
 		line.getChildren().addAll(tit, ic, val);
