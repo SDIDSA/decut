@@ -36,12 +36,26 @@ public class HardwareInfo extends SettingsContent {
 		GraphicsCard gpu = hal.getGraphicsCards().getFirst();
 		String gpuVendor = gpu.getVendor()
 				.toLowerCase();
-
 		OperatingSystem os = si.getOperatingSystem();
 
 		String osName = os.getFamily()
-				.toLowerCase()
-				.replace(" ", "-");
+				.toLowerCase();
+
+		OperatingSystem.OSVersionInfo osVersionInfo = os.getVersionInfo();
+
+		String osVersion = osVersionInfo.getVersion();
+
+		if(osVersion.equalsIgnoreCase("unknown")) {
+			osVersion = osVersionInfo.getBuildNumber();
+		}
+
+//		if(osName.contains("linux")) {
+//			osName = "linux";
+//		}
+
+		System.out.println(cpuVendor);
+		System.out.println(gpuVendor);
+		System.out.println(osName);
 
 
 		VBox hardwareRoot = new VBox(10);
@@ -54,7 +68,7 @@ public class HardwareInfo extends SettingsContent {
 
 		VBox osRoot = new VBox(10);
 		System.out.println(os.getVersionInfo());
-		addLine(osRoot, "os-" + osName, "Operating system", os.getFamily() + " " + os.getVersionInfo().getVersion());
+		addLine(osRoot, "os-" + osName, "Operating system", os.getFamily() + " " + osVersion);
 		addLine(osRoot, os.getBitness() + "-bit", "Architecture", os.getBitness() + "bit");
 		getChildren().add(osRoot);
 
