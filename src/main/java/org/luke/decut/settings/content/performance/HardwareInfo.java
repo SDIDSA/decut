@@ -35,11 +35,23 @@ public class HardwareInfo extends SettingsContent {
 		GraphicsCard gpu = hal.getGraphicsCards().getFirst();
 		String gpuVendor = gpu.getVendor()
 				.toLowerCase();
+		if(gpuVendor.contains("vmware")) {
+			gpuVendor = "vmware";
+		}
+		OperatingSystem os = si.getOperatingSystem();
+
+		String osName = os.getFamily()
+				.toLowerCase()
+				.replace(" ", "-");
+
+//		if(osName.contains("linux")) {
+//			osName = "linux";
+//		}
 
 		System.out.println(cpuVendor);
 		System.out.println(gpuVendor);
+		System.out.println(osName);
 
-		OperatingSystem os = si.getOperatingSystem();
 
 		VBox hardwareRoot = new VBox(10);
 		addLine(hardwareRoot, "cpu-" + cpuVendor, "Processor", cpu.getProcessorIdentifier().getName());
@@ -50,7 +62,8 @@ public class HardwareInfo extends SettingsContent {
 		addHeader(settings.getWindow(), "Software", new Separator(settings.getWindow(), Orientation.HORIZONTAL));
 
 		VBox osRoot = new VBox(10);
-		addLine(osRoot, "os-" + os.getFamily().toLowerCase(), "Operating system", os.getFamily() + " " + si.getOperatingSystem().getVersionInfo().getVersion());
+		System.out.println(os.getVersionInfo());
+		addLine(osRoot, "os-" + osName, "Operating system", os.getFamily() + " " + si.getOperatingSystem().getVersionInfo().getVersion());
 		addLine(osRoot, os.getBitness() + "-bit", "Architecture", os.getBitness() + "bit");
 		getChildren().add(osRoot);
 
